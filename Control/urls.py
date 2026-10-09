@@ -16,4 +16,5 @@ urlpatterns = [
     path("roles/<int:pk>/", views.role_edit, name="role_edit"),
     path("roles/<int:pk>/view/", views.role_detail, name="role_detail"),
     path("roles/<int:pk>/delete/", views.role_delete, name="role_delete"),
+    path("branding/", views.branding, name="branding"),
 ]

@@ -8,8 +8,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.db.models import Count
 from django.views.decorators.http import require_POST
 
-from .forms import RoleForm, StyledPasswordChangeForm, UserForm, UserProfileForm
-from .models import Role, UserProfile
+from .forms import OrganizationSettingsForm, RoleForm, StyledPasswordChangeForm, UserForm, UserProfileForm
+from .models import OrganizationSettings, Role, UserProfile
 from .permissions import admin_required, can_manage_team, can_use_crm, is_hr
 
 
@@ -277,3 +277,14 @@ def user_action(request, pk):
                 update_session_auth_hash(request, target)
             messages.success(request, f"Password updated for {target.username}.")
     return redirect("control_center")
+
+
+@admin_required
+def branding(request):
+    settings_obj = OrganizationSettings.get_solo()
+    form = OrganizationSettingsForm(request.POST or None, request.FILES or None, instance=settings_obj)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Company name, logo and billing defaults updated.")
+        return redirect("branding")
+    return render(request, "Control/branding.html", {"form": form, "organization": settings_obj})

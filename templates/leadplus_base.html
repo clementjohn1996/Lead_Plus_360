@@ -1,16 +1,17 @@
 {% load static %}
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block title %}LeadPlus-360{% endblock %}</title>
+<title>{% block title %}{{ organization.name|default:"LeadPlus-360" }}{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'leadplus/app.css' %}">
 <link rel="stylesheet" href="{% static 'leadplus/modules.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'leadplus/accounts.css' %}">
 </head><body>
 {% with url=request.resolver_match.url_name %}
 <div class="app-shell">
 <aside class="sidebar" id="sidebar">
-  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">L</span><span>LeadPlus<span>-360</span></span></a>
+  <a class="brand" href="{% url 'home' %}">{% if organization.logo %}<img class="brand-logo" src="{{ organization.logo.url }}" alt="{{ organization.name }}">{% else %}<span class="brand-mark">{{ organization.name|first|upper }}</span>{% endif %}<span>{{ organization.name }}</span></a>
   <div class="workspace"><small>WORKSPACE</small><strong>Team Performance Hub</strong></div>
 <nav>
     <a class="{% if url == 'home' %}active{% endif %}" href="{% url 'home' %}"><i>⌂</i> Home</a>
@@ -35,6 +36,13 @@
     <a class="{% if url == 'tasks' or url == 'add_task' %}active{% endif %}" href="{% url 'tasks' %}"><i>✓</i> Follow-ups</a>
     <a class="{% if url == 'quick_lead' %}active{% endif %}" href="{% url 'quick_lead' %}"><i>⚡</i> Quick lead</a>
     <a class="{% if url == 'export_leads' %}active{% endif %}" href="{% url 'export_leads' %}"><i>⤓</i> Export leads</a>
+    {% endif %}
+    {% if nav.accounts %}
+    <div class="nav-label">Finance</div>
+    <a class="{% if url == 'accounts_dashboard' %}active{% endif %}" href="{% url 'accounts_dashboard' %}"><i>₹</i> Accounts overview</a>
+    <a class="{% if url == 'account_invoices' or url == 'account_invoice_create' or url == 'account_invoice_detail' %}active{% endif %}" href="{% url 'account_invoices' %}"><i>▣</i> Invoices</a>
+    <a class="{% if url == 'account_customers' or url == 'account_customer_create' %}active{% endif %}" href="{% url 'account_customers' %}"><i>☺</i> Customers</a>
+    <a class="{% if url == 'account_expenses' or url == 'account_expense_create' %}active{% endif %}" href="{% url 'account_expenses' %}"><i>−</i> Expenses</a>
     {% endif %}
     {% if nav.manager or nav.hr %}
     <div class="nav-label">Delivery</div>
@@ -69,6 +77,7 @@
     <a class="{% if url == 'delivery_calendar' %}active{% endif %}" href="{% url 'delivery_calendar' %}"><i>▦</i> Work calendar</a>
     <div class="nav-label">Admin</div>
     <a class="{% if url == 'control_center' %}active{% endif %}" href="{% url 'control_center' %}"><i>♧</i> Control center</a>
+    <a class="{% if url == 'branding' %}active{% endif %}" href="{% url 'branding' %}"><i>✦</i> Company branding</a>
     <a class="{% if url == 'roles' %}active{% endif %}" href="{% url 'roles' %}"><i>☺</i> Roles & access</a>
     <a class="{% if url == 'hr_workflows' or url == 'hr_workflow_create' or url == 'hr_workflow_edit' %}active{% endif %}" href="{% url 'hr_workflows' %}"><i>♒</i> Onboarding workflows</a>
     <a class="{% if url == 'performance_kpis' or url == 'performance_kpi_edit' %}active{% endif %}" href="{% url 'performance_kpis' %}"><i>☰</i> KPI setup</a>

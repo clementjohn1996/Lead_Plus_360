@@ -1,0 +1,7 @@
+.brand-logo{width:32px;height:32px;border-radius:10px;object-fit:contain;background:#fff;padding:3px}
+.account-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.account-summary .metric strong{font-size:24px}
+.invoice-total{font:800 16px Manrope;color:var(--ink)}
+.status-draft{background:#eef0f4;color:#697386}.status-sent{background:#eaf1ff;color:#3974db}.status-partial{background:#fff3e2;color:#c06f12}.status-paid{background:#e3f7ee;color:#159570}.status-overdue,.status-cancelled{background:#ffeaee;color:#d94a62}
+.brand-preview{display:flex;align-items:center;gap:14px;padding:16px;background:#f8f9fc;border-radius:12px}.brand-preview img{width:54px;height:54px;object-fit:contain;border-radius:12px;background:#fff}.brand-preview strong{font:800 18px Manrope}
+@media(max-width:900px){.account-summary{grid-template-columns:repeat(2,1fr)}}

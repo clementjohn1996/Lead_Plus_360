@@ -53,6 +53,10 @@ def sees_team_leads(user):
     return has_flag(user, "sees_team_leads")
 
 
+def can_manage_accounts(user):
+    return has_flag(user, "can_manage_accounts")
+
+
 def assignable_roles(user):
     """Roles the acting user may grant. Privileged roles are Super Admin only."""
     from .models import Role

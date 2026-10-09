@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 from django.utils.text import slugify
 
-from Control.models import Role, UserProfile
+from Control.models import OrganizationSettings, Role, UserProfile
 
 
 class StyledFormMixin:
@@ -45,7 +45,7 @@ class RoleForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Role
         fields = ["label", "description", "level", "is_active", "can_use_crm", "sees_all_leads",
-                  "sees_team_leads", "can_manage_team", "can_manage_hr", "is_privileged", "is_super_admin"]
+                  "sees_team_leads", "can_manage_team", "can_manage_hr", "can_manage_accounts", "is_privileged", "is_super_admin"]
         widgets = {"description": forms.Textarea(attrs={"rows": 2})}
 
     def __init__(self, *args, **kwargs):
@@ -74,3 +74,11 @@ class RoleForm(StyledFormMixin, forms.ModelForm):
         if commit:
             role.save()
         return role
+
+
+class OrganizationSettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = OrganizationSettings
+        fields = ["name", "tagline", "logo", "primary_color", "currency", "tax_id",
+                  "billing_email", "phone", "address", "invoice_prefix"]
+        widgets = {"address": forms.Textarea(attrs={"rows": 3})}

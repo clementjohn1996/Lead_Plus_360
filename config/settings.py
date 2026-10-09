@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "Attendance.apps.AttendanceConfig",
     "Performance.apps.PerformanceConfig",
     "Delivery.apps.DeliveryConfig",
+    "Accounts.apps.AccountsConfig",
 ]
 
 MIDDLEWARE = [

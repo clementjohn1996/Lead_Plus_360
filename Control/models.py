@@ -29,6 +29,9 @@ class Role(models.Model):
     can_manage_hr = models.BooleanField(
         "HR access", default=False, help_text="Employees, onboarding, attendance admin, KPIs, TV displays."
     )
+    can_manage_accounts = models.BooleanField(
+        "Accounts access", default=False, help_text="Customers, invoices, payments, expenses and reports."
+    )
     is_privileged = models.BooleanField(
         "Privileged", default=False, help_text="Only a Super Admin may assign this role."
     )
@@ -86,3 +89,32 @@ class UserProfile(models.Model):
     @property
     def is_super_admin(self):
         return bool(self.role_id and self.role.is_super_admin)
+
+
+class OrganizationSettings(models.Model):
+    """Singleton company identity and billing defaults shown across the workspace."""
+
+    name = models.CharField(max_length=160, default="LeadPlus-360")
+    tagline = models.CharField(max_length=200, blank=True)
+    logo = models.ImageField(upload_to="organization/", blank=True, null=True)
+    primary_color = models.CharField(max_length=7, default="#6d4aff")
+    currency = models.CharField(max_length=3, default="INR")
+    tax_id = models.CharField(max_length=80, blank=True)
+    billing_email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=40, blank=True)
+    address = models.TextField(blank=True)
+    invoice_prefix = models.CharField(max_length=12, default="INV")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Organization settings"
+        verbose_name_plural = "Organization settings"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

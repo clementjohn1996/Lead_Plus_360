@@ -1,0 +1,13 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Company branding · {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">SUPER ADMIN</span><h1>Company branding</h1><p>Change the name, logo and defaults used across the workspace and invoices.</p></div></div>
+<div class="detail-grid"><section><form method="post" enctype="multipart/form-data" class="card lead-form">{% csrf_token %}
+<div class="section-title"><span>1</span><h2>Identity</h2></div>
+<div class="form-grid"><div class="field"><label>{{ form.name.label }}</label>{{ form.name }}{{ form.name.errors }}</div><div class="field"><label>{{ form.tagline.label }}</label>{{ form.tagline }}</div><div class="field"><label>{{ form.logo.label }}</label>{{ form.logo }}</div></div>
+<div class="form-grid"><div class="field"><label>{{ form.primary_color.label }}</label>{{ form.primary_color }}</div><div class="field"><label>{{ form.currency.label }}</label>{{ form.currency }}</div><div class="field"><label>{{ form.invoice_prefix.label }}</label>{{ form.invoice_prefix }}</div></div>
+<div class="section-title"><span>2</span><h2>Billing contact</h2></div>
+<div class="form-grid"><div class="field"><label>{{ form.tax_id.label }}</label>{{ form.tax_id }}</div><div class="field"><label>{{ form.billing_email.label }}</label>{{ form.billing_email }}</div><div class="field"><label>{{ form.phone.label }}</label>{{ form.phone }}</div></div>
+<div class="field"><label>{{ form.address.label }}</label>{{ form.address }}</div><div class="form-footer"><button class="primary-btn">Save company settings</button></div></form></section>
+<aside><section class="card"><div class="card-head"><div><h2>Live identity</h2><p>Shown in navigation and billing documents.</p></div></div><div class="brand-preview">{% if organization.logo %}<img src="{{ organization.logo.url }}" alt="{{ organization.name }}">{% else %}<span class="brand-mark">{{ organization.name|first|upper }}</span>{% endif %}<div><strong>{{ organization.name }}</strong><small>{{ organization.tagline|default:"Your company workspace" }}</small></div></div></section></aside></div>
+{% endblock %}
