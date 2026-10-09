@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
-from Control.models import Role
+from Control.models import Role, UserProfile
+from Control.org_defaults import ensure_standard_roles
 
 
 class Command(BaseCommand):
@@ -32,10 +33,12 @@ class Command(BaseCommand):
         user.set_password(password)
         user.save()
 
-        # Ensure the administrator has the built-in Super Admin role.
+        # Setup is intentionally limited to roles and one administrator account;
+        # it does not create demo users, leads, or other business data.
+        ensure_standard_roles()
         role = Role.objects.filter(name="super_admin", is_active=True).first()
         if role:
-            profile = user.profile
+            profile, _ = UserProfile.objects.get_or_create(user=user)
             profile.role = role
             profile.save(update_fields=["role"])
 

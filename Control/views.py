@@ -140,16 +140,56 @@ def guide(request):
 
 @admin_required
 def roles(request):
+    from LeadManager.models import Department
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        description = request.POST.get("description", "").strip()
+        if not name:
+            messages.error(request, "Department name is required.")
+        elif Department.objects.filter(name__iexact=name).exists():
+            messages.error(request, "That department already exists.")
+        else:
+            Department.objects.create(name=name, description=description)
+            messages.success(request, f"{name} department created.")
+            return redirect("roles")
+
     rows = Role.objects.annotate(user_count=Count("users")).order_by("level", "label")
-    return render(request, "Control/roles.html", {"roles": rows})
+    return render(request, "Control/roles.html", {
+        "roles": rows,
+        "departments": Department.objects.all(),
+    })
 
 
 @admin_required
 def role_edit(request, pk=None):
     role = get_object_or_404(Role, pk=pk) if pk else None
+    previous_label = role.label if role else None
     form = RoleForm(request.POST or None, instance=role)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        saved_role = form.save()
+        # Roles are the source of truth for employee classification. Mirror
+        # each role into Departments so the employee form stays data-driven.
+        from LeadManager.models import Department
+
+        old_department = (
+            Department.objects.filter(name__iexact=previous_label).first()
+            if previous_label else None
+        )
+        department = Department.objects.filter(name__iexact=saved_role.label).first()
+        if old_department and old_department.pk != getattr(department, "pk", None):
+            if not department:
+                old_department.name = saved_role.label
+                old_department.save(update_fields=["name", "updated_at"])
+                department = old_department
+        elif not department:
+            department = Department.objects.create(
+                name=saved_role.label,
+                description=saved_role.description,
+            )
+        if department and not department.description and saved_role.description:
+            department.description = saved_role.description
+            department.save(update_fields=["description", "updated_at"])
         messages.success(request, "Role saved.")
         return redirect("roles")
     return render(request, "Control/role_form.html", {"form": form, "role": role})

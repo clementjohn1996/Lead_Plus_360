@@ -118,6 +118,44 @@ class HierarchyTests(TestCase):
 
 
 class CustomRoleAndWorkflowTests(TestCase):
+    def test_department_can_be_created_from_roles_page(self):
+        admin = make_user("department-admin", role="super_admin")
+        self.client.force_login(admin)
+        response = self.client.post(reverse("roles"), {
+            "name": "Customer Success", "description": "Customer relationships.",
+        })
+        self.assertRedirects(response, reverse("roles"))
+        from LeadManager.models import Department
+        department = Department.objects.get(name="Customer Success")
+        self.assertEqual(department.description, "Customer relationships.")
+
+    def test_designation_uses_the_role_options(self):
+        from HR.forms import NewEmployeeForm
+
+        form = NewEmployeeForm(actor=make_user("designation-admin", role="super_admin"))
+        labels = {value for value, label in form.fields["designation"].choices if value}
+        role_labels = set(form.fields["role"].queryset.values_list("label", flat=True))
+        self.assertEqual(labels, role_labels)
+        self.assertEqual(form.fields["designation"].widget.__class__.__name__, "Select")
+
+    def test_employee_creation_repairs_removed_standard_roles(self):
+        Role.objects.all().delete()
+        employee, _ = create_employee(
+            username="clean-install", first_name="Clean", last_name="Install",
+            email="clean@example.com", role_name="developer",
+        )
+        self.assertEqual(employee.user.profile.role.name, "developer")
+
+    def test_employee_edit_repairs_missing_user_profile(self):
+        user = User.objects.create_user("profileless", password="pw-12345-x")
+        profile = user.profile
+        profile.delete()
+        employee = Employee.objects.create(user=user, status="active")
+        self.client.force_login(make_user("hr-profile-repair", role="hr"))
+        response = self.client.get(reverse("hr_employee_edit", args=[employee.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(UserProfile.objects.filter(user=user).exists())
+
     def test_super_admin_defines_role_and_it_takes_effect(self):
         admin = make_user("root", role="super_admin")
         self.client.force_login(admin)
@@ -126,6 +164,8 @@ class CustomRoleAndWorkflowTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         role = Role.objects.get(name="seo_analyst")
+        from LeadManager.models import Department
+        self.assertTrue(Department.objects.filter(name="SEO Analyst").exists())
         self.assertTrue(role.can_use_crm)
         self.assertFalse(role.can_manage_hr)
         analyst = make_user("seo", role="seo_analyst")

@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 
 from Control.models import Role, UserProfile
+from Control.org_defaults import ensure_standard_roles
 
 from .models import Employee, OnboardingTask, OnboardingTemplate
 
@@ -18,7 +19,8 @@ def generate_password(length=12):
 def pick_template(employee):
     """Most specific workflow wins: role, then department, then the company default."""
     qs = OnboardingTemplate.objects.filter(is_active=True)
-    role = Role.objects.filter(users__user_id=employee.user_id).first()
+    profile, _ = UserProfile.objects.get_or_create(user=employee.user)
+    role = profile.role if profile.role_id and profile.role.is_active else None
     if role:
         template = qs.filter(role=role).first()
         if template:
@@ -88,8 +90,17 @@ def create_employee(*, username, first_name, last_name, email, role_name="develo
         username=username, email=email, password=password, first_name=first_name, last_name=last_name
     )
     profile, _ = UserProfile.objects.get_or_create(user=user)
-    profile.role = Role.objects.filter(name=role_name).first()
+    role = Role.objects.filter(name=role_name, is_active=True).first()
+    if not role:
+        ensure_standard_roles()
+        role = Role.objects.filter(name=role_name, is_active=True).first()
+    if not role:
+        raise ValueError(f"Unknown or inactive role: {role_name}")
+    profile.role = role
     profile.save(update_fields=["role"])
+    # UserProfile may have been cached by the User post_save signal before the
+    # role was assigned. Clear that stale reverse relation on the returned user.
+    user._state.fields_cache.pop("profile", None)
     employee = Employee.objects.create(user=user, **fields)
     generate_onboarding(employee)
     return employee, password

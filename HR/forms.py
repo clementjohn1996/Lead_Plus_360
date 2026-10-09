@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from Control.models import Role
+from Control.models import Role, UserProfile
+from Control.org_defaults import ensure_standard_roles
 from Control.permissions import assignable_roles, is_admin
 
 from .models import Employee, EmployeeDocument, OnboardingTask, OnboardingTemplate, OnboardingTemplateTask
@@ -30,12 +31,21 @@ class TimeInput(forms.TimeInput):
         super().__init__(format="%H:%M", **kwargs)
 
 
+def _designation_choices(roles, current=""):
+    choices = [(role.label, role.label) for role in roles]
+    values = {value for value, _ in choices}
+    if current and current not in values:
+        choices.insert(0, (current, current))
+    return [("", "---------"), *choices]
+
+
 class NewEmployeeForm(Styled, forms.ModelForm):
     first_name = forms.CharField(max_length=150)
     last_name = forms.CharField(max_length=150, required=False)
     email = forms.EmailField(label="Work email")
     username = forms.CharField(max_length=150, help_text="Login name")
     role = forms.ModelChoiceField(queryset=Role.objects.none(), required=True)
+    designation = forms.ChoiceField(required=False, label="Designation")
 
     class Meta:
         model = Employee
@@ -48,7 +58,11 @@ class NewEmployeeForm(Styled, forms.ModelForm):
 
     def __init__(self, *args, actor=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["role"].queryset = assignable_roles(actor)
+        if not Role.objects.filter(is_active=True).exists():
+            ensure_standard_roles()
+        roles = assignable_roles(actor)
+        self.fields["role"].queryset = roles
+        self.fields["designation"].choices = _designation_choices(roles)
         self._style()
 
     def clean_username(self):
@@ -63,6 +77,7 @@ class EmployeeForm(Styled, forms.ModelForm):
     last_name = forms.CharField(max_length=150, required=False)
     email = forms.EmailField(label="Work email")
     role = forms.ModelChoiceField(queryset=Role.objects.none(), required=True)
+    designation = forms.ChoiceField(required=False, label="Designation")
 
     class Meta:
         model = Employee
@@ -79,15 +94,19 @@ class EmployeeForm(Styled, forms.ModelForm):
     def __init__(self, *args, actor=None, **kwargs):
         super().__init__(*args, **kwargs)
         user = self.instance.user
-        self.fields["role"].queryset = assignable_roles(actor)
-        current = user.profile.role
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        roles = assignable_roles(actor)
+        self.fields["role"].queryset = roles
+        current = profile.role
         if current and (current.is_privileged or current.is_super_admin) and not is_admin(actor):
-            self.fields["role"].queryset = Role.objects.filter(pk=current.pk)
+            roles = Role.objects.filter(pk=current.pk)
+            self.fields["role"].queryset = roles
             self.fields["role"].disabled = True
         self.fields["first_name"].initial = user.first_name
         self.fields["last_name"].initial = user.last_name
         self.fields["email"].initial = user.email
-        self.fields["role"].initial = user.profile.role
+        self.fields["role"].initial = profile.role
+        self.fields["designation"].choices = _designation_choices(roles, self.instance.designation)
         self.fields["manager"].queryset = Employee.objects.exclude(pk=self.instance.pk).exclude(status="exited")
         self._style()
 
@@ -98,7 +117,7 @@ class EmployeeForm(Styled, forms.ModelForm):
         user.last_name = self.cleaned_data["last_name"]
         user.email = self.cleaned_data["email"]
         user.save()
-        profile = user.profile
+        profile, _ = UserProfile.objects.get_or_create(user=user)
         profile.role = self.cleaned_data["role"]
         profile.save(update_fields=["role"])
         user.is_active = employee.status != "exited"

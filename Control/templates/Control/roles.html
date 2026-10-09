@@ -8,4 +8,8 @@
 <td>{{ r.user_count }}</td>
 <td class="row-gap"><a class="ghost-btn" href="{% url 'role_detail' r.pk %}">View</a><a class="ghost-btn" href="{% url 'role_edit' r.pk %}">Edit</a>{% if not r.is_super_admin %}<a class="ghost-btn" href="{% url 'role_detail' r.pk %}#delete">Delete</a>{% endif %}</td></tr>
 {% endfor %}</tbody></table></div></section>
+<section class="card"><div class="card-head"><div><h2>Departments</h2><p>Departments appear in the employee form and can be used for workflow matching.</p></div></div>
+<div class="grid-2-1"><div class="table-wrap"><table><thead><tr><th>Department</th><th>Employees</th></tr></thead><tbody>
+{% for department in departments %}<tr><td><strong>{{ department.name }}</strong><small>{{ department.description|default:"" }}</small></td><td>{{ department.employees.count }}</td></tr>{% empty %}<tr><td colspan="2"><div class="empty">No departments configured.</div></td></tr>{% endfor %}
+</tbody></table></div><form method="post" class="lead-form">{% csrf_token %}<div class="field"><label>Department name</label><input class="form-control" name="name" required placeholder="e.g. Customer Success"></div><div class="field"><label>Description</label><textarea class="form-control" name="description" rows="3" placeholder="What does this department handle?"></textarea></div><button class="primary-btn">Add department</button></form></div></section>
 {% endblock %}
