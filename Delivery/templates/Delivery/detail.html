@@ -1,0 +1,37 @@
+{% extends "leadplus_base.html" %}
+{% block title %}{{ work.title }} · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">DELIVERY WORK #{{ work.pk }}</span><h1>{{ work.title }}</h1><p>{{ work.lead.company|default:work.lead.name }} · {{ work.service|default:"Service" }} · {{ work.department|default:"Unassigned department" }}</p></div><a class="secondary-btn" href="{% url 'delivery_dashboard' %}">← Workflow</a></div>
+<div class="kpi-grid">
+<div class="stat-card"><small>Status</small><strong>{{ work.get_status_display }}</strong></div>
+<div class="stat-card"><small>Progress</small><strong>{{ work.progress }}%</strong></div>
+<div class="stat-card"><small>Due</small><strong>{{ work.due_date|default:"—" }}</strong></div>
+<div class="stat-card"><small>Priority</small><strong>{{ work.get_priority_display }}</strong></div>
+</div>
+<div class="grid-2">
+<div class="panel"><div class="panel-head"><h2>Accountability chain</h2></div>
+<div class="workflow-chain">
+<div><b>1 · BDE</b><span>{{ work.bde.get_full_name|default:work.bde.username|default:"—" }}</span><small>Brings / wins the work</small></div>
+<div><b>↓</b></div>
+<div><b>2 · BDM</b><span>{{ work.bdm.get_full_name|default:work.bdm.username|default:"Not assigned" }}</span><small>Accepts scope and routes delivery</small>
+{% if can_route_bdm and not work.bdm %}<form method="post" action="{% url 'delivery_assign_bdm' work.pk %}">{% csrf_token %}{{ bdm_form.as_p }}<button class="primary-btn">Route to BDM</button></form>{% endif %}
+{% if can_bdm and work.status == "awaiting_bdm" and work.bdm %}<form method="post" action="{% url 'delivery_accept_bdm' work.pk %}">{% csrf_token %}<button class="primary-btn">Accept & send to PM</button></form>{% endif %}</div>
+<div><b>↓</b></div>
+<div><b>3 · Project Manager</b><span>{{ work.project_manager.get_full_name|default:work.project_manager.username|default:"Not assigned" }}</span><small>Plans and assigns execution</small>
+{% if can_bdm and work.status in "awaiting_pm assigned" %}<form method="post" action="{% url 'delivery_assign_pm' work.pk %}">{% csrf_token %}{{ pm_form.as_p }}<button class="primary-btn">Assign PM</button></form>{% endif %}</div>
+<div><b>↓</b></div>
+<div><b>4 · Execution Team</b><span>{{ work.department|default:"Team" }}</span><small>Developer / Video / Graphics / Digital Marketing</small></div>
+</div></div>
+<div class="panel"><div class="panel-head"><h2>Project details</h2></div>
+<p>{{ work.description|default:"No description provided." }}</p><p><b>Start:</b> {{ work.start_date|default:"—" }} &nbsp; <b>Due:</b> {{ work.due_date|default:"—" }}</p>
+{% if can_pm %}<form method="post" action="{% url 'delivery_assign_team' work.pk %}">{% csrf_token %}<h3>Assign execution work</h3>{{ team_form.as_p }}<button class="primary-btn">Assign team member</button></form>{% endif %}
+</div></div>
+<div class="panel"><div class="panel-head"><h2>Execution assignments</h2></div>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Employee</th><th>Role</th><th>Status</th><th>Progress</th><th>Due</th><th>Update</th></tr></thead><tbody>
+{% for a in work.assignments.all %}<tr><td><b>{{ a.title }}</b><small>{{ a.instructions|truncatechars:90 }}</small></td><td>{{ a.employee.get_full_name|default:a.employee.username }}</td><td>{{ a.get_role_display }}</td><td>{{ a.get_status_display }}</td><td>{{ a.progress }}%</td><td>{{ a.due_date|default:"—" }}</td><td><form method="post" action="{% url 'delivery_update_assignment' a.pk %}">{% csrf_token %}<select name="status"><option value="assigned" {% if a.status == "assigned" %}selected{% endif %}>Assigned</option><option value="accepted" {% if a.status == "accepted" %}selected{% endif %}>Accepted</option><option value="in_progress" {% if a.status == "in_progress" %}selected{% endif %}>In Progress</option><option value="review" {% if a.status == "review" %}selected{% endif %}>Review</option><option value="completed" {% if a.status == "completed" %}selected{% endif %}>Completed</option></select><input name="progress" type="number" min="0" max="100" value="{{ a.progress }}" style="width:70px"><button class="secondary-btn">Save</button></form></td></tr>
+{% empty %}<tr><td colspan="7">No execution tasks assigned yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if can_pm %}<form method="post" action="{% url 'delivery_complete_work' work.pk %}" style="margin-top:16px">{% csrf_token %}<button class="primary-btn">Mark Project Completed</button></form>{% endif %}
+</div>
+<div class="panel"><div class="panel-head"><h2>Activity trail</h2></div>{% for e in work.events.all %}<div class="timeline-item"><b>{{ e.event_type|title }}</b> — {{ e.message }} <small>{{ e.created_at }}</small></div>{% empty %}<p>No workflow events yet.</p>{% endfor %}</div>
+{% endblock %}

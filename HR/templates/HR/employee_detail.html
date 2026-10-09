@@ -1,0 +1,33 @@
+{% extends "leadplus_base.html" %}{% block title %}{{ emp.full_name }} · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div class="row-gap"><div class="avatar-lg">{{ emp.full_name|first|upper }}</div><div><span class="eyebrow">{{ emp.employee_code }}</span><h1>{{ emp.full_name }}</h1><p>{{ emp.designation|default:"No designation" }}{% if emp.department %} · {{ emp.department.name }}{% endif %} · <span class="pill {{ emp.status }}">{{ emp.get_status_display }}</span></p></div></div>
+<div class="row-gap"><a class="ghost-btn" href="{% url 'performance_employee' emp.pk %}">Performance</a>{% if hr %}<a class="primary-btn" href="{% url 'hr_employee_edit' emp.pk %}">Edit</a>{% endif %}</div></div>
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>Profile</h2></div></div>
+<div class="contact-grid"><div><small>Work email</small><b>{{ emp.user.email|default:"—" }}</b></div><div><small>Username</small><b>{{ emp.user.username }}</b></div>
+<div><small>Reports to</small><b>{{ emp.manager.full_name|default:"—" }}</b></div><div><small>Type</small><b>{{ emp.get_employment_type_display }}</b></div>
+<div><small>Work mode</small><b>{{ emp.get_work_mode_display }}</b></div><div><small>Shift</small><b>{{ emp.shift_start|time:"H:i" }} – {{ emp.shift_end|time:"H:i" }}</b></div>
+<div><small>Joined</small><b>{{ emp.date_of_joining|date:"d M Y" }}</b></div><div><small>Face enrolled</small><b>{% if face_enrolled %}Yes{% else %}No{% endif %}</b></div></div>
+{% if hr and face_enrolled %}<form method="post" action="{% url 'attendance_reset_face' emp.pk %}" style="margin-top:14px" onsubmit="return confirm('Remove this employee\'s face data? They will need to enroll again.')">{% csrf_token %}<button class="danger-btn">Reset face data</button></form>{% endif %}</section>
+<section class="card"><div class="card-head"><div><h2>Recent attendance</h2></div></div>
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>In</th><th>Out</th><th>Status</th></tr></thead><tbody>
+{% for r in recent_attendance %}<tr><td>{{ r.date|date:"d M" }}</td><td>{{ r.check_in|time:"H:i"|default:"—" }}</td><td>{{ r.check_out|time:"H:i"|default:"—" }}</td><td><span class="pill {{ r.status }}">{{ r.get_status_display }}</span></td></tr>
+{% empty %}<tr><td colspan="4"><div class="empty">No attendance yet.</div></td></tr>{% endfor %}</tbody></table></div></section>
+</div>
+<section class="card"><div class="card-head"><div><h2>Onboarding</h2><p>{{ progress.done }} of {{ progress.total }} tasks complete</p></div>
+{% if hr and not tasks %}<form method="post" action="{% url 'hr_checklist' emp.pk %}">{% csrf_token %}<button class="ghost-btn">Generate checklist</button></form>{% endif %}</div>
+<div class="progress"><i style="width:{{ progress.percent }}%"></i></div><br>
+<div class="check-list">{% for t in tasks %}<div class="check-item {% if t.status == 'done' %}done{% endif %} {% if t.is_overdue %}overdue{% endif %}"><span class="box">{% if t.status == 'done' %}✓{% endif %}</span>
+<div class="body"><b>{{ t.title }}</b>{% if not t.required %} <span class="pill none">Optional</span>{% endif %}<br><small>{{ t.get_responsible_display }} · {{ t.get_category_display }}{% if t.due_date %} · due {{ t.due_date|date:"d M" }}{% endif %}{% if t.attachment %} · <a href="{{ t.attachment.url }}" target="_blank" rel="noopener">file</a>{% endif %}</small></div>
+{% if t.status == 'submitted' %}<span class="pill pending">Awaiting {{ t.get_approver_display }}</span>{% endif %}{% if t.user_can_approve %}<form method="post" action="{% url 'hr_task_update' t.pk %}" class="row-gap">{% csrf_token %}<button class="primary-btn" name="action" value="approve">Approve</button><button class="ghost-btn" name="action" value="reject">Send back</button></form>{% endif %}
+{% if hr %}<form method="post" action="{% url 'hr_task_update' t.pk %}" class="row-gap" enctype="multipart/form-data">{% csrf_token %}
+{% if t.status == 'pending' %}{% if t.requires_upload %}<input type="file" name="attachment">{% endif %}<button class="ghost-btn" name="action" value="done">Mark done</button>{% if not t.required %}<button class="ghost-btn" name="action" value="skip">Skip</button>{% endif %}{% elif t.status != 'submitted' %}<button class="ghost-btn" name="action" value="reopen">Reopen</button>{% endif %}</form>{% endif %}</div>
+{% empty %}<div class="empty">No onboarding tasks.</div>{% endfor %}</div>
+{% if hr %}<form method="post" action="{% url 'hr_task_add' emp.pk %}" class="inline-form" style="margin-top:16px">{% csrf_token %}
+{% for f in task_form %}<div class="field">{{ f }}</div>{% endfor %}<button class="primary-btn">Add task</button></form>{% endif %}</section>
+{% if hr %}<section class="card"><div class="card-head"><div><h2>Documents</h2></div></div>
+<div class="table-wrap"><table><thead><tr><th>Document</th><th>Type</th><th>Uploaded</th></tr></thead><tbody>
+{% for d in documents %}<tr><td><a href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.title }}</a></td><td>{{ d.get_doc_type_display }}</td><td>{{ d.uploaded_at|date:"d M Y" }}</td></tr>{% empty %}<tr><td colspan="3"><div class="empty">No documents.</div></td></tr>{% endfor %}</tbody></table></div>
+<form method="post" action="{% url 'hr_document_add' emp.pk %}" enctype="multipart/form-data" class="inline-form" style="margin-top:14px">{% csrf_token %}{% for f in doc_form %}<div class="field">{{ f }}</div>{% endfor %}<button class="primary-btn">Upload</button></form></section>{% endif %}
+{% if reports %}<section class="card"><div class="card-head"><div><h2>Direct reports</h2></div></div>{% for r in reports %}<a class="lead-name" href="{% url 'hr_employee_detail' r.pk %}">{{ r.full_name }}</a> {% endfor %}</section>{% endif %}
+{% endblock %}

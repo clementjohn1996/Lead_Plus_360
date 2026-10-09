@@ -1,0 +1,24 @@
+{% extends "leadplus_base.html" %}{% block title %}Dashboard · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">OVERVIEW</span><h1>Good to see you, {{ request.user.first_name|default:request.user.username }}.</h1><p>Track every opportunity from first touch to signed client.</p></div><a class="primary-btn" href="{% url 'lead_create' %}">＋ New lead</a></div>
+<div class="metric-grid">
+ <div class="metric"><div class="metric-icon purple">◎</div><span>Total leads</span><strong>{{ total_leads }}</strong><small>{{ new_leads }} new this pipeline</small></div>
+ <div class="metric"><div class="metric-icon blue">◈</div><span>Active leads</span><strong>{{ active_leads }}</strong><small>Still in the pipeline</small></div>
+ <div class="metric"><div class="metric-icon green">↗</div><span>Won clients</span><strong>{{ won }}</strong><small>₹ {{ won_value|floatformat:0 }}</small></div>
+ <div class="metric"><div class="metric-icon orange">◷</div><span>Open pipeline</span><strong>₹ {{ pipeline_value|floatformat:0 }}</strong><small>Weighted forecast: ₹ {{ weighted_pipeline|floatformat:0 }}</small></div>
+</div>
+<div class="grid-2-1">
+<section class="card"><div class="card-head"><div><h2>Pipeline</h2><p>Current lead distribution</p></div><a href="{% url 'pipeline' %}" class="text-link">Open pipeline →</a></div>
+<div class="stage-bars">{% for x in stage_counts %}<div class="stage-row"><span>{{ x.label }}</span><div class="bar"><i style="width:{% widthratio x.count total_leads 100 %}%"></i></div><b>{{ x.count }}</b></div>{% endfor %}</div></section>
+<section class="card"><div class="card-head"><div><h2>Lead sources</h2><p>Where opportunities come from</p></div></div>
+<div class="source-list">{% for x in source_counts %}<div><span>{{ x.source__name|default:"Unassigned" }}</span><b>{{ x.total }}</b></div>{% empty %}<div class="empty">Add leads to see source performance.</div>{% endfor %}</div></section>
+</div>
+<div class="grid-2-1">
+<section class="card"><div class="card-head"><div><h2>Upcoming follow-ups</h2><p>Don't let warm opportunities go cold.</p></div><a href="{% url 'tasks' %}" class="text-link">All tasks →</a></div>
+<div class="table-wrap"><table><thead><tr><th>Lead</th><th>Stage</th><th>Follow-up</th><th>Owner</th></tr></thead><tbody>
+{% for lead in followups %}<tr><td><a class="lead-name" href="{% url 'lead_detail' lead.id %}">{{ lead.name }}<small>{{ lead.company }}</small></a></td><td><span class="pill {{ lead.stage }}">{{ lead.get_stage_display }}</span></td><td>{{ lead.next_follow_up|date:"d M, H:i" }}</td><td>{{ lead.owner.username|default:"—" }}</td></tr>{% empty %}<tr><td colspan="4"><div class="empty">No follow-ups due.</div></td></tr>{% endfor %}
+</tbody></table></div></section>
+<section class="card"><div class="card-head"><div><h2>Quick capture</h2><p>Add an opportunity in seconds.</p></div></div>
+<form method="post" action="{% url 'quick_lead' %}" class="quick-form">{% csrf_token %}{{ quick_form.as_p }}<button class="primary-btn full">Save lead</button></form></section>
+</div>
+{% endblock %}

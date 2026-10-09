@@ -1,0 +1,13 @@
+{% extends "leadplus_base.html" %}{% block title %}{% if workflow %}{{ workflow.name }}{% else %}New workflow{% endif %} · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">ADMIN</span><h1>{% if workflow %}{{ workflow.name }}{% else %}New workflow{% endif %}</h1><p>Define the steps, who does them, and which ones need approval. Blank step rows are ignored; tick Delete to remove a step.</p></div><a class="ghost-btn" href="{% url 'hr_workflows' %}">Back</a></div>
+<form method="post" class="lead-form">{% csrf_token %}
+{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+<section class="card"><div class="form-grid">{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{% if f.field.widget.input_type == 'checkbox' %}{{ f }} {% endif %}{{ f.label }}</label>{% if f.field.widget.input_type != 'checkbox' %}{{ f }}{% endif %}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}{% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}</div>{% endfor %}</div></section>
+<section class="card" style="margin-top:16px"><div class="card-head"><div><h2>Steps</h2><p>Saving adds three more blank rows.</p></div></div>
+{{ formset.management_form }}{% if formset.non_form_errors %}<div class="form-errors">{{ formset.non_form_errors }}</div>{% endif %}
+{% for sf in formset %}<div class="card" style="margin-bottom:12px;background:var(--bg,#f6f7fb)">{% for h in sf.hidden_fields %}{{ h }}{% endfor %}{% if sf.non_field_errors %}<div class="form-errors">{{ sf.non_field_errors }}</div>{% endif %}
+<div class="form-grid">{% for f in sf.visible_fields %}<div class="field"><label for="{{ f.id_for_label }}">{% if f.field.widget.input_type == 'checkbox' %}{{ f }} {% endif %}{{ f.label }}</label>{% if f.field.widget.input_type != 'checkbox' %}{{ f }}{% endif %}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}</div></div>{% endfor %}
+</section>
+<div class="form-footer"><button class="primary-btn">Save workflow</button></div></form>
+{% endblock %}

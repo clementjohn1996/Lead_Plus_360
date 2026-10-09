@@ -1,0 +1,87 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Work Calendar · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="wc-shell">
+  <div class="wc-hero">
+    <div>
+      <div class="wc-kicker"><span class="wc-live-dot"></span> DELIVERY CONTROL CENTER</div>
+      <h1>Work Calendar</h1>
+      <p>Plan every client deliverable, approve the schedule and track execution from one workspace.</p>
+    </div>
+    <div class="wc-actions">
+      <a class="wc-btn wc-btn-light" href="{% url 'delivery_dashboard' %}">↗ Delivery Dashboard</a>
+      {% if role == 'bd_manager' or role == 'management' or role == 'bd_executive' or role == 'bd_team_lead' or role == 'super_admin' %}
+      <a class="wc-btn wc-btn-primary" href="{% url 'delivery_packages' %}">⚙ Manage Packages</a>
+      {% endif %}
+      {% if role == 'bd_manager' or role == 'management' or role == 'bd_executive' or role == 'bd_team_lead' or role == 'super_admin' %}
+      <a class="wc-btn wc-btn-success" href="{% url 'delivery_calendar_task_quick' today|date:'Y-m-d' %}" title="Add task for today">＋</a>
+      {% endif %}
+      <a class="wc-notification" href="{% url 'delivery_calendar_date' today|date:'Y-m-d' %}">
+        <span class="wc-notif-bell">🔔</span>
+        {% if reminders %}<span class="wc-notif-count">{{ reminders|length }}</span>{% endif %}
+      </a>
+    </div>
+  </div>
+
+  <div class="wc-stats">
+    <div class="wc-stat"><span class="wc-stat-icon purple">📅</span><div><small>Active Plans</small><strong>{{ plans|length }}</strong><em>delivery plans</em></div></div>
+    <div class="wc-stat"><span class="wc-stat-icon amber">⏳</span><div><small>Awaiting Approval</small><strong>{% widthratio plans|length 1 1 %}</strong><em>review in workflow</em></div></div>
+    <div class="wc-stat"><span class="wc-stat-icon green">✓</span><div><small>Scheduled Work</small><strong>{{ plans|length }}</strong><em>client projects</em></div></div>
+    <div class="wc-stat"><span class="wc-stat-icon blue">⚡</span><div><small>View</small><strong>{{ current|date:"M" }}</strong><em>{{ current|date:"Y" }}</em></div></div>
+  </div>
+
+  <div class="wc-calendar-card">
+    <div class="wc-calendar-head">
+      <div>
+        <span class="wc-section-label">DELIVERY SCHEDULE</span>
+        <h2>{{ current|date:"F Y" }}</h2>
+      </div>
+      <div class="wc-calendar-controls">
+        <a class="wc-icon-btn" href="?month={{month_prev}}" aria-label="Previous month">‹</a>
+        <a class="wc-today-btn" href="?month={{today|date:'Y-m'}}">Today</a>
+        <a class="wc-icon-btn" href="?month={{month_next}}" aria-label="Next month">›</a>
+      </div>
+    </div>
+
+    <div class="wc-legend">
+      <span><i class="video"></i> Video</span><span><i class="poster"></i> Poster</span><span><i class="ads"></i> Meta Ads</span><span><i class="website"></i> Website</span><span><i class="seo"></i> SEO</span>
+    </div>
+
+    <div class="wc-weekdays"><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div></div>
+    <div class="wc-grid">
+      {% for cell in cells %}
+        {% if cell %}
+        <div class="wc-day {% if current.year == today.year and current.month == today.month and cell.day == today.day %}is-today{% endif %}">
+          <div class="wc-day-top"><span class="wc-day-number"><a href="{% url 'delivery_calendar_date' cell.date_str %}">{{cell.day}}</a></span>{% if current.year == today.year and current.month == today.month and cell.day == today.day %}<span class="wc-today-dot">TODAY</span>{% endif %}</div>
+          <div class="wc-day-tasks">
+          {% for task in cell.tasks %}
+            <a class="wc-task task-{{task.task_type}}" href="{% url 'delivery_calendar_plan_edit' task.plan.pk %}">
+              <span class="wc-task-art">{% if task.gif_url %}<img src="{{task.gif_url}}" alt="">{% else %}{{task.icon}}{% endif %}</span>
+              <span class="wc-task-body"><b>{{task.title}}</b><small>{{task.plan.client_name}}</small><span class="wc-task-meta">{{task.progress}}% · {{task.plan.package_name}}{% if task.reminder_enabled %} 🔔{% endif %}</span></span>
+            </a>
+          {% empty %}<div class="wc-empty-day">No delivery tasks</div>{% endfor %}
+          </div>
+        </div>
+        {% else %}<div class="wc-day wc-blank"></div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="wc-bottom-head">
+    <div><span class="wc-section-label">CLIENT DELIVERY PIPELINE</span><h2>Active delivery plans</h2></div>
+    <div class="wc-search"><span>⌕</span><input id="wcSearch" type="search" placeholder="Search client or package…"></div>
+  </div>
+  <div class="wc-plan-grid" id="wcPlans">
+    {% for plan in plans %}
+    <a class="wc-plan-card" data-search="{{plan.client_name}} {{plan.package_name}}" href="{% url 'delivery_calendar_plan_edit' plan.pk %}">
+      <div class="wc-plan-top"><span class="wc-client-avatar">{{ plan.client_name|first|upper }}</span><div><h3>{{plan.client_name}}</h3><p>{{plan.package_name}}</p></div><span class="wc-status {{plan.status}}">{{plan.get_status_display}}</span></div>
+      <div class="wc-plan-progress"><div><span>Delivery progress</span><b>{{plan.progress}}%</b></div><div class="wc-progress"><i style="width:{{plan.progress}}%"></i></div></div>
+      <div class="wc-plan-foot"><span>👤 {{plan.bde.get_full_name|default:plan.bde.username|default:'Unassigned'}}</span><span>🎯 {{plan.target_completion_date|date:"d M Y"|default:"No target"}}</span></div>
+    </a>
+    {% empty %}<div class="wc-no-plans">No delivery plans yet. Convert a won lead and create its work calendar.</div>{% endfor %}
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){const q=document.getElementById('wcSearch');if(q){q.addEventListener('input',()=>{const v=q.value.toLowerCase();document.querySelectorAll('.wc-plan-card').forEach(c=>c.style.display=c.dataset.search.toLowerCase().includes(v)?'':'none')})}});
+</script>
+{% endblock %}

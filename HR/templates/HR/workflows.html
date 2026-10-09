@@ -1,0 +1,10 @@
+{% extends "leadplus_base.html" %}{% block title %}Workflows · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">ADMIN</span><h1>Onboarding workflows</h1><p>The checklist each new joiner gets. The most specific match wins: role, then department, then the company default.</p></div><a class="primary-btn" href="{% url 'hr_workflow_create' %}">＋ New workflow</a></div>
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Workflow</th><th>Applies to</th><th>Steps</th><th>Status</th><th></th></tr></thead><tbody>
+{% for w in workflows %}<tr><td><b>{{ w.name }}</b></td>
+<td>{% if w.is_default %}Everyone (default){% elif w.role %}Role: {{ w.role.label }}{% elif w.department %}Dept: {{ w.department.name }}{% else %}—{% endif %}</td>
+<td>{{ w.task_count }}</td><td>{% if w.is_active %}<span class="pill won">Active</span>{% else %}<span class="pill none">Inactive</span>{% endif %}</td>
+<td class="row-gap"><a class="ghost-btn" href="{% url 'hr_workflow_edit' w.pk %}">Edit</a><form method="post" action="{% url 'hr_workflow_delete' w.pk %}" onsubmit="return confirm('Delete this workflow?')">{% csrf_token %}<button class="ghost-btn">Delete</button></form></td></tr>
+{% empty %}<tr><td colspan="5"><div class="empty">No workflows yet.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

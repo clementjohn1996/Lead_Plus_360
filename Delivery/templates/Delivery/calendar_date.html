@@ -1,0 +1,66 @@
+{% extends "leadplus_base.html" %}
+{% block title %}{{ view_date|date:"M d, Y" }} · Work Calendar{% endblock %}
+{% block content %}
+<div class="wc-shell">
+  <div class="wc-hero">
+    <div>
+      <div class="wc-kicker"><span class="wc-live-dot"></span> DELIVERY SCHEDULE</div>
+      <h1>{{ view_date|date:"l, F j, Y" }}</h1>
+      <p>Delivery tasks scheduled for this date.</p>
+    </div>
+    <div class="wc-actions">
+      <a class="wc-btn wc-btn-light" href="{% url 'delivery_calendar' %}">← Calendar</a>
+      {% if can_edit_any %}
+      <a class="wc-btn wc-btn-success" href="{% url 'delivery_calendar_task_quick' view_date|date:'Y-m-d' %}">＋ Add task</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if reminders %}
+  <div class="wc-alerts">
+    {% for r in reminders %}<div class="wc-alert"><span>🔔</span><strong>{{ r.title }}</strong> — {{ r.plan.client_name }} · reminder fires {{ r.reminder_date|date:"M j" }}</div>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if tasks %}
+  <div class="card">
+    <div class="card-head"><div><h2>Tasks for {{ view_date|date:"M j, Y" }}</h2></div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Task</th><th>Plan / Client</th><th>Type</th><th>Owner</th><th>Progress</th><th>Reminder</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for task in tasks %}
+          <tr>
+            <td><span class="wc-task-art">{% if task.gif_url %}<img src="{{task.gif_url}}" alt="" style="width:24px;height:24px">{% else %}{{task.icon}}{% endif %}</span> <b>{{ task.title }}</b></td>
+            <td>{{ task.plan.package_name }}<br><small>{{ task.plan.client_name }}</small></td>
+            <td>{{ task.get_task_type_display }}</td>
+            <td>{{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"Unassigned" }}</td>
+            <td>{{ task.progress }}%</td>
+            <td>{% if task.reminder_enabled %}🔔 {{ task.reminder_days_before }}d before{% else %}—{% endif %}</td>
+            <td><span class="pill {{ task.status }}">{{ task.get_status_display }}</span></td>
+            <td><a class="text-link" href="{% url 'delivery_calendar_plan_edit' task.plan.pk %}">Open plan</a></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card"><div class="empty">No delivery tasks on {{ view_date|date:"M j, Y" }}.</div></div>
+  {% if can_edit_any %}
+  <div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Add a task</h2></div></div>
+  <a class="primary-btn" href="{% url 'delivery_calendar_task_quick' view_date|date:'Y-m-d' %}">＋ Add delivery task</a>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<style>
+.wc-alerts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.wc-alert { background: #fff0f5; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+.wc-notification { position: relative; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; background: #f5f6fb; text-decoration: none; }
+.wc-notif-count { background: #6d4aff; color: #fff; border-radius: 50%; width: 18px; height: 18px; display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+.wc-btn-success { background: #6d4aff; color: #fff; border: 0; padding: 8px 14px; border-radius: 8px; }
+</style>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "leadplus_base.html" %}{% block title %}Attendance · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">ATTENDANCE</span><h1>{% if enrolled %}Mark attendance{% else %}Set up face recognition{% endif %}</h1><p>Face verification and your location are checked when you punch.</p></div></div>
+<div class="two-col">
+<section class="card">
+ <div class="cam"><video id="video" autoplay playsinline muted></video><div class="ring"></div></div>
+ <canvas id="canvas" hidden></canvas>
+ <div id="status" class="status-box">Allow camera{% if enrolled %} and location{% endif %} access when your browser asks.</div>
+ <div class="row-gap">
+ {% if not enrolled %}
+  <button id="enrollBtn" class="primary-btn" type="button">Capture &amp; enroll my face</button>
+ {% else %}
+  <button id="inBtn" class="primary-btn" type="button" {% if record and record.check_in %}disabled{% endif %}>Check in</button>
+  <button id="outBtn" class="ghost-btn" type="button" {% if not record or not record.check_in or record.check_out %}disabled{% endif %}>Check out</button>
+ {% endif %}
+ </div>
+ <p class="muted" style="font-size:12px">Face in good light, looking at the camera. Camera and location need HTTPS (or localhost).</p>
+</section>
+<section class="stack">
+ <div class="card"><div class="card-head"><div><h2>Today</h2></div></div>
+  <div class="summary-row" id="today">
+   <div class="chip"><small>Status</small><b id="tStatus">{% if record %}{{ record.get_status_display }}{% else %}Not in{% endif %}</b></div>
+   <div class="chip"><small>In</small><b id="tIn">{{ record.check_in|time:"h:i A"|default:"—" }}</b></div>
+   <div class="chip"><small>Out</small><b id="tOut">{{ record.check_out|time:"h:i A"|default:"—" }}</b></div>
+  </div>
+  <p class="muted" style="font-size:12px">Shift {{ emp.shift_start|time:"H:i" }}–{{ emp.shift_end|time:"H:i" }} · {{ emp.get_work_mode_display }}{% if not emp.can_punch_remotely %} · must be at an office location{% endif %}</p></div>
+ <div class="card"><div class="card-head"><div><h2>Last 14 days</h2></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th></tr></thead><tbody>
+  {% for r in history %}<tr><td>{{ r.date|date:"d M" }}</td><td>{{ r.check_in|time:"H:i"|default:"—" }}</td><td>{{ r.check_out|time:"H:i"|default:"—" }}</td><td>{{ r.worked_hours|default:"—" }}</td><td><span class="pill {{ r.status }}">{{ r.get_status_display }}</span></td></tr>
+  {% empty %}<tr><td colspan="5"><div class="empty">No records yet.</div></td></tr>{% endfor %}</tbody></table></div></div>
+</section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  var video = document.getElementById('video'), canvas = document.getElementById('canvas'), box = document.getElementById('status');
+  var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+  var token = '{{ csrf_token }}';
+  var enrolled = {{ enrolled|yesno:"true,false" }};
+  function say(msg, kind){ box.textContent = msg; box.className = 'status-box' + (kind ? ' ' + kind : ''); }
+  function setButtons(disabled){ document.querySelectorAll('#enrollBtn,#inBtn,#outBtn').forEach(function(b){ b.dataset.busy = disabled ? '1' : ''; b.disabled = disabled || b.dataset.locked === '1'; }); }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ say('This browser cannot access the camera. Use HTTPS or localhost.', 'err'); return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:640}, height:{ideal:480}}, audio:false})
+    .then(function(s){ video.srcObject = s; say(enrolled ? 'Camera ready. Choose Check in or Check out.' : 'Camera ready. Click enroll to capture your face.'); })
+    .catch(function(){ say('Camera access was blocked. Allow it in the browser settings and reload.', 'err'); });
+  document.querySelectorAll('#inBtn,#outBtn').forEach(function(b){ if(b.disabled) b.dataset.locked = '1'; });
+  function frame(){
+    if(!video.videoWidth) return null;
+    canvas.width = 480; canvas.height = Math.round(480 * video.videoHeight / video.videoWidth);
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+  function post(url, body){
+    return fetch(url, {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':token}, body:JSON.stringify(body)})
+      .then(function(r){ return r.json().catch(function(){ return {ok:false, error:'Unexpected server response.'}; }); });
+  }
+  function position(){
+    return new Promise(function(resolve, reject){
+      if(!navigator.geolocation) return reject(new Error('Location is not supported by this browser.'));
+      navigator.geolocation.getCurrentPosition(resolve, function(e){
+        reject(new Error(e.code === 1 ? 'Location permission denied. Allow location access to mark attendance.' : 'Could not determine your location. Try again.'));
+      }, {enableHighAccuracy:true, timeout:15000, maximumAge:0});
+    });
+  }
+  var enrollBtn = document.getElementById('enrollBtn');
+  if(enrollBtn) enrollBtn.addEventListener('click', function(){
+    var img = frame(); if(!img){ say('Camera is not ready yet.', 'err'); return; }
+    setButtons(true); say('Checking your face…');
+    post('{% url "attendance_api_enroll" %}', {image:img}).then(function(d){
+      if(d.ok){ say('Face enrolled. Reloading…', 'ok'); setTimeout(function(){ location.reload(); }, 900); }
+      else { say(d.error || 'Enrollment failed.', 'err'); setButtons(false); }
+    }).catch(function(){ say('Network error. Try again.', 'err'); setButtons(false); });
+  });
+  function punch(action){
+    var img = frame(); if(!img){ say('Camera is not ready yet.', 'err'); return; }
+    setButtons(true); say('Getting your location…');
+    position().then(function(p){
+      say('Verifying your face…');
+      return post('{% url "attendance_api_punch" %}', {action:action, image:img, lat:p.coords.latitude, lng:p.coords.longitude, accuracy:p.coords.accuracy});
+    }).then(function(d){
+      if(d.ok){
+        say(action === 'in' ? 'Checked in successfully.' : 'Checked out. See you tomorrow!', 'ok');
+        document.getElementById('tStatus').textContent = d.record.status;
+        document.getElementById('tIn').textContent = d.record.check_in || '—';
+        document.getElementById('tOut').textContent = d.record.check_out || '—';
+        var inB = document.getElementById('inBtn'), outB = document.getElementById('outBtn');
+        if(action === 'in'){ inB.dataset.locked = '1'; outB.dataset.locked = ''; } else { outB.dataset.locked = '1'; }
+        setButtons(false);
+      } else { say(d.error || 'Could not mark attendance.', 'err'); setButtons(false); }
+    }).catch(function(e){ say(e.message || 'Something went wrong.', 'err'); setButtons(false); });
+  }
+  var inBtn = document.getElementById('inBtn'), outBtn = document.getElementById('outBtn');
+  if(inBtn) inBtn.addEventListener('click', function(){ punch('in'); });
+  if(outBtn) outBtn.addEventListener('click', function(){ punch('out'); });
+})();
+</script>
+{% endblock %}

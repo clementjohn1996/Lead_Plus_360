@@ -1,0 +1,7 @@
+{% extends "leadplus_base.html" %}{% block title %}Appraisals · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PERFORMANCE</span><h1>Appraisals</h1><p>Created automatically when a BDE becomes appraisal-eligible. Nothing changes salary or role automatically.</p></div><a class="ghost-btn" href="{% url 'bde_dashboard' %}">Dashboard</a></div>
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Period</th><th>History</th><th>Avg %</th><th>G / Y / R</th><th>Decision</th><th></th></tr></thead><tbody>
+{% for a in appraisals %}<tr><td><b>{{ a.employee.full_name }}</b></td><td>{{ a.period_start|date:"M Y" }} - {{ a.period_end|date:"M Y" }}</td><td><small>{{ a.history }}</small></td><td>{{ a.avg_achievement }}%</td><td>{{ a.green_months }} / {{ a.yellow_months }} / {{ a.red_months }}</td><td><span class="pill">{{ a.get_decision_display }}</span></td><td><a class="ghost-btn" href="{% url 'bde_appraisal' a.pk %}">Open</a></td></tr>
+{% empty %}<tr><td colspan="7"><div class="empty">No appraisals yet.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

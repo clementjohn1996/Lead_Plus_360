@@ -1,0 +1,11 @@
+{% extends "leadplus_base.html" %}{% block title %}Monthly attendance · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">HR</span><h1>Monthly attendance</h1><p>{{ month_label }} · {{ workdays }} working days.</p></div>
+<form class="inline-form"><select name="month" class="form-select">{% for m in months %}<option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ m }}</option>{% endfor %}</select>
+<select name="year" class="form-select">{% for y in years %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+<button class="ghost-btn">Show</button><a class="primary-btn" href="?year={{ year }}&month={{ month }}&format=csv">Export CSV</a></form></div>
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Present</th><th>Half days</th><th>Late</th><th>Absent</th><th>Hours</th><th>Attendance</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><a class="lead-name" href="{% url 'hr_employee_detail' r.emp.pk %}">{{ r.emp.full_name }}<small>{{ r.emp.employee_code }}</small></a></td><td>{{ r.present }}</td><td>{{ r.half }}</td><td>{{ r.late }}</td><td>{{ r.absent }}</td><td>{{ r.hours }}</td>
+<td><div class="row-gap"><div class="progress"><i style="width:{{ r.percent }}%"></i></div>{{ r.percent }}%</div></td></tr>
+{% empty %}<tr><td colspan="7"><div class="empty">No employees.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

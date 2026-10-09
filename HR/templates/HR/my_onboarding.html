@@ -1,0 +1,12 @@
+{% extends "leadplus_base.html" %}{% block title %}My onboarding · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">WELCOME</span><h1>My onboarding</h1><p>Complete these steps to get fully set up.</p></div></div>
+<section class="card"><div class="card-head"><div><h2>{{ progress.percent }}% complete</h2><p>{{ progress.done }} of {{ progress.total }} tasks</p></div></div>
+<div class="progress"><i style="width:{{ progress.percent }}%"></i></div><br>
+<div class="check-list">{% for t in tasks %}<div class="check-item {% if t.status == 'done' %}done{% endif %} {% if t.is_overdue %}overdue{% endif %}"><span class="box">{% if t.status == 'done' %}✓{% endif %}</span>
+<div class="body"><b>{{ t.title }}</b><br><small>{{ t.description }}{% if t.due_date %} · due {{ t.due_date|date:"d M" }}{% endif %} · {{ t.get_responsible_display }}</small></div>
+{% if t.status == 'pending' %}{% if t.auto_key == 'face_enrollment' %}<a class="primary-btn" href="{% url 'attendance' %}">Enroll face</a>
+{% elif t.responsible == 'employee' %}{% if t.employee_locked %}<span class="pill info">Submitted — HR will review</span>{% else %}<form method="post" action="{% url 'hr_task_update' t.pk %}" enctype="multipart/form-data" class="row-gap">{% csrf_token %}{% if t.requires_upload %}<input type="file" name="attachment" required>{% endif %}<button class="primary-btn" name="action" value="done">Mark done</button></form>{% endif %}
+{% else %}<span class="pill pending">Waiting on {{ t.get_responsible_display }}</span>{% endif %}{% elif t.status == 'submitted' %}<span class="pill pending">Awaiting {{ t.get_approver_display }} approval</span>{% endif %}</div>
+{% empty %}<div class="empty">No onboarding tasks assigned.</div>{% endfor %}</div></section>
+{% endblock %}

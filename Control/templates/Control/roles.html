@@ -1,0 +1,11 @@
+{% extends "leadplus_base.html" %}{% block title %}Roles · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">ADMIN</span><h1>Roles &amp; access</h1><p>Define roles and decide what each one can do. Assign them to people from HR → Employees.</p></div><a class="primary-btn" href="{% url 'role_create' %}">＋ New role</a></div>
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Role</th><th>Level</th><th>Access</th><th>People</th><th></th></tr></thead><tbody>
+{% for r in roles %}<tr><td><span class="lead-name">{{ r.label }}<small>{{ r.name }}{% if r.is_system %} · built-in{% endif %}{% if not r.is_active %} · inactive{% endif %}</small></span></td>
+<td>{{ r.level }}</td>
+<td>{% if r.is_super_admin %}<span class="pill won">Everything</span>{% else %}{% if r.can_use_crm %}<span class="pill">CRM</span> {% endif %}{% if r.sees_all_leads %}<span class="pill">All leads</span> {% elif r.sees_team_leads %}<span class="pill">Team leads</span> {% endif %}{% if r.can_manage_team %}<span class="pill">Team manager</span> {% endif %}{% if r.can_manage_hr %}<span class="pill">HR</span> {% endif %}{% if r.is_privileged %}<span class="pill lost">Privileged</span> {% endif %}{% if not r.can_use_crm and not r.can_manage_team and not r.can_manage_hr %}<span class="muted">Self-service</span>{% endif %}{% endif %}</td>
+<td>{{ r.user_count }}</td>
+<td class="row-gap"><a class="ghost-btn" href="{% url 'role_detail' r.pk %}">View</a><a class="ghost-btn" href="{% url 'role_edit' r.pk %}">Edit</a>{% if not r.is_super_admin %}<a class="ghost-btn" href="{% url 'role_detail' r.pk %}#delete">Delete</a>{% endif %}</td></tr>
+{% endfor %}</tbody></table></div></section>
+{% endblock %}

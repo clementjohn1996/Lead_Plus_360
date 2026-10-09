@@ -1,0 +1,26 @@
+{% extends "leadplus_base.html" %}{% block title %}Profile · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">ACCOUNT</span><h1>My profile</h1></div></div>
+<section class="card" style="margin-bottom:18px"><div class="card-head"><div><h2>{{ nav.role_label }}{% if employee %} · {{ employee.employee_code }}{% endif %}</h2><p class="muted">What your role can do</p></div></div>
+<ul class="stack">{% for label, ok in access %}<li>{% if ok %}✅{% else %}⛔{% endif %} {{ label }}</li>{% endfor %}</ul>
+{% if is_admin %}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+<a class="primary-btn small" href="{% url 'roles' %}">Roles &amp; access</a>
+<a class="primary-btn small" href="{% url 'hr_workflows' %}">Onboarding workflows</a>
+<a class="primary-btn small" href="{% url 'hr_employees' %}">Employees</a>
+<a class="primary-btn small" href="{% url 'attendance_dashboard' %}">Attendance</a>
+<a class="primary-btn small" href="{% url 'attendance_offices' %}">Office locations</a>
+<a class="primary-btn small" href="{% url 'performance_kpis' %}">KPI setup</a>
+<a class="primary-btn small" href="{% url 'performance_tv_manage' %}">TV displays</a>
+<a class="primary-btn small" href="{% url 'admin:index' %}">Django admin</a></div>{% endif %}</section>
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>Details</h2></div></div>
+<form method="post" enctype="multipart/form-data" class="stack">{% csrf_token %}{{ user_form.non_field_errors }}{{ profile_form.non_field_errors }}
+{% for f in user_form %}<div class="field"><label>{{ f.label }}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}
+{% for f in profile_form %}<div class="field"><label>{{ f.label }}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}
+<button class="primary-btn">Save</button></form></section>
+<section class="card"><div class="card-head"><div><h2>Change password</h2></div></div>
+<form method="post" class="stack">{% csrf_token %}<input type="hidden" name="change_password" value="1">{{ pw_form.non_field_errors }}
+{% for f in pw_form %}<div class="field"><label>{{ f.label }}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}
+<button class="primary-btn">Update password</button></form></section>
+</div>
+{% endblock %}

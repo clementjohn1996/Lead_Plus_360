@@ -1,0 +1,104 @@
+{% load static %}
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}LeadPlus-360{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'leadplus/app.css' %}">
+<link rel="stylesheet" href="{% static 'leadplus/modules.css' %}?v=2">
+</head><body>
+{% with url=request.resolver_match.url_name %}
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">L</span><span>LeadPlus<span>-360</span></span></a>
+  <div class="workspace"><small>WORKSPACE</small><strong>Team Performance Hub</strong></div>
+<nav>
+    <a class="{% if url == 'home' %}active{% endif %}" href="{% url 'home' %}"><i>⌂</i> Home</a>
+    <a class="{% if url == 'guide' %}active{% endif %}" href="{% url 'guide' %}"><i>☰</i> User guide</a>
+    {% if nav.employee and not nav.admin %}
+    <div class="nav-label">My work</div>
+    <a class="{% if url == 'attendance' %}active{% endif %}" href="{% url 'attendance' %}"><i>●</i> Attendance</a>
+    <a class="{% if url == 'my_onboarding' %}active{% endif %}" href="{% url 'my_onboarding' %}"><i>✓</i> My onboarding</a>
+    <a class="{% if url == 'performance_me' %}active{% endif %}" href="{% url 'performance_me' %}"><i>★</i> My performance</a>
+     <a class="{% if url == 'bde_me' %}active{% endif %}" href="{% url 'bde_me' %}"><i>◆</i> My BDE target</a>
+    {% endif %}
+    {% if nav.employee and not nav.admin %}
+    <div class="nav-label">Delivery</div>
+    <a class="{% if url == 'delivery_dashboard' or url == 'delivery_detail' %}active{% endif %}" href="{% url 'delivery_dashboard' %}"><i>↗</i> My work & delivery</a>
+    <a class="{% if url == 'delivery_calendar' %}active{% endif %}" href="{% url 'delivery_calendar' %}"><i>▦</i> Work calendar</a>
+    {% endif %}
+    {% if nav.crm %}
+    <div class="nav-label">CRM</div>
+    <a class="{% if url == 'leadplus_dashboard' %}active{% endif %}" href="{% url 'leadplus_dashboard' %}"><i>■</i> CRM overview</a>
+    <a class="{% if url == 'leads' or url == 'lead_detail' or url == 'lead_edit' or url == 'lead_create' %}active{% endif %}" href="{% url 'leads' %}"><i>●</i> Leads</a>
+    <a class="{% if url == 'pipeline' %}active{% endif %}" href="{% url 'pipeline' %}"><i>░</i> Pipeline</a>
+    <a class="{% if url == 'tasks' or url == 'add_task' %}active{% endif %}" href="{% url 'tasks' %}"><i>✓</i> Follow-ups</a>
+    <a class="{% if url == 'quick_lead' %}active{% endif %}" href="{% url 'quick_lead' %}"><i>⚡</i> Quick lead</a>
+    <a class="{% if url == 'export_leads' %}active{% endif %}" href="{% url 'export_leads' %}"><i>⤓</i> Export leads</a>
+    {% endif %}
+    {% if nav.manager or nav.hr %}
+    <div class="nav-label">Delivery</div>
+    <a class="{% if url == 'delivery_dashboard' or url == 'delivery_detail' %}active{% endif %}" href="{% url 'delivery_dashboard' %}"><i>↗</i> Delivery workflow</a>
+    <a class="{% if url == 'delivery_calendar' %}active{% endif %}" href="{% url 'delivery_calendar' %}"><i>▦</i> Work calendar</a>
+    <div class="nav-label">Performance</div>
+    <a class="{% if url == 'performance' or url == 'performance_employee' %}active{% endif %}" href="{% url 'performance' %}"><i>★</i> Leaderboard</a>
+     <a class="{% if url == 'bde_dashboard' or url == 'bde_profile' %}active{% endif %}" href="{% url 'bde_dashboard' %}"><i>◆</i> BDE targets</a>
+     <a class="{% if url == 'bde_calendar' %}active{% endif %}" href="{% url 'bde_calendar' %}"><i>▦</i> Performance calendar</a>
+     <a class="{% if url == 'bde_appraisals' or url == 'bde_appraisal' %}active{% endif %}" href="{% url 'bde_appraisals' %}"><i>↑</i> Appraisals</a>
+     <a class="{% if url == 'pip_list' or url == 'pip_detail' or url == 'pip_create' %}active{% endif %}" href="{% url 'pip_list' %}"><i>♒</i> Improvement plans</a>
+     <a class="{% if url == 'bde_recalculate' %}active{% endif %}" href="{% url 'bde_recalculate' %}"><i>↻</i> Recalculate BDE</a>
+     <a class="{% if url == 'bde_export' %}active{% endif %}" href="{% url 'bde_export' %}"><i>⤓</i> Export BDE data</a>
+     {% if nav.hr %}<a class="{% if url == 'performance_tv_manage' or url == 'performance_tv_action' %}active{% endif %}" href="{% url 'performance_tv_manage' %}"><i>▣</i> Performance TV</a>{% endif %}
+    {% endif %}
+    {% if nav.hr %}
+    <div class="nav-label">People &amp; Organization</div>
+    <a class="{% if url == 'hr_employees' or url == 'hr_employee_detail' or url == 'hr_employee_edit' %}active{% endif %}" href="{% url 'hr_employees' %}"><i>☺</i> Employees</a>
+    <a class="{% if url == 'hr_employee_create' %}active{% endif %}" href="{% url 'hr_employee_create' %}"><i>＋</i> Add employee / manager</a>
+    <a class="{% if url == 'hr_departments' %}active{% endif %}" href="{% url 'hr_departments' %}"><i>▦</i> Departments</a>
+    {% if nav.admin %}<a class="{% if url == 'roles' or url == 'role_create' or url == 'role_edit' or url == 'role_detail' %}active{% endif %}" href="{% url 'roles' %}"><i>♧</i> Roles &amp; access</a>{% endif %}
+    <div class="nav-label">HR</div>
+    <a class="{% if url == 'hr_onboarding' %}active{% endif %}" href="{% url 'hr_onboarding' %}"><i>♒</i> Onboarding</a>
+    <a class="{% if url == 'hr_workflows' or url == 'hr_workflow_create' or url == 'hr_workflow_edit' %}active{% endif %}" href="{% url 'hr_workflows' %}"><i>♒</i> Workflows</a>
+    <a class="{% if url == 'attendance_dashboard' %}active{% endif %}" href="{% url 'attendance_dashboard' %}"><i>·</i> Attendance today</a>
+    <a class="{% if url == 'attendance_monthly' %}active{% endif %}" href="{% url 'attendance_monthly' %}"><i>▦</i> Monthly report</a>
+    <a class="{% if url == 'attendance_offices' or url == 'attendance_office_edit' %}active{% endif %}" href="{% url 'attendance_offices' %}"><i>⌖</i> Office locations</a>
+    {% endif %}
+    {% if nav.admin %}
+    <div class="nav-label">Delivery</div>
+    <a class="{% if url == 'delivery_dashboard' or url == 'delivery_detail' %}active{% endif %}" href="{% url 'delivery_dashboard' %}"><i>↗</i> Delivery workflow</a>
+    <a class="{% if url == 'delivery_calendar' %}active{% endif %}" href="{% url 'delivery_calendar' %}"><i>▦</i> Work calendar</a>
+    <div class="nav-label">Admin</div>
+    <a class="{% if url == 'control_center' %}active{% endif %}" href="{% url 'control_center' %}"><i>♧</i> Control center</a>
+    <a class="{% if url == 'roles' %}active{% endif %}" href="{% url 'roles' %}"><i>☺</i> Roles & access</a>
+    <a class="{% if url == 'hr_workflows' or url == 'hr_workflow_create' or url == 'hr_workflow_edit' %}active{% endif %}" href="{% url 'hr_workflows' %}"><i>♒</i> Onboarding workflows</a>
+    <a class="{% if url == 'performance_kpis' or url == 'performance_kpi_edit' %}active{% endif %}" href="{% url 'performance_kpis' %}"><i>☰</i> KPI setup</a>
+    <a class="{% if url == 'performance_tv_manage' or url == 'performance_tv_action' %}active{% endif %}" href="{% url 'performance_tv_manage' %}"><i>▣</i> TV displays</a>
+    <a class="{% if url == 'pip_list' or url == 'pip_detail' or url == 'pip_create' %}active{% endif %}" href="{% url 'pip_list' %}"><i>♒</i> Improvement plans</a>
+     <a class="{% if url == 'bde_config' or url == 'bde_target_update' %}active{% endif %}" href="{% url 'bde_config' %}"><i>♧</i> BDE targets & rules</a>
+     <a class="{% if url == 'bde_audit' %}active{% endif %}" href="{% url 'bde_audit' %}"><i>☰</i> Performance audit log</a>
+     <a class="{% if url == 'bde_alerts_clear' %}active{% endif %}" href="{% url 'bde_alerts_clear' %}"><i>🔔</i> Clear BDE alerts</a>
+    <a href="{% url 'admin:index' %}"><i>♧</i> Django admin</a>
+    {% endif %}
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="user-mini" href="{% url 'profile' %}"><span class="avatar">{{ request.user.username|first|upper }}</span><div><b>{{ request.user.get_full_name|default:request.user.username }}</b><small>{{ nav.role_label|default:"Team member" }}</small></div></a>
+    <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button type="submit" class="logout">↪ Sign out</button></form>
+  </div>
+</aside>
+<main class="main">
+<header class="topbar"><button class="mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+ {% if nav.crm %}<div class="top-search">🔍 <input id="globalSearch" placeholder="Search leads, companies, email..." autocomplete="off"></div>{% else %}<div class="top-search"></div>{% endif %}
+ <div class="top-actions">{% if nav.crm %}<a class="primary-btn small" href="{% url 'lead_create' %}">+ Add lead</a>{% endif %}<form action="{% url 'logout' %}" method="post" class="top-logout-form">{% csrf_token %}<button type="submit" class="top-logout">↪ Logout</button></form></div>
+</header>
+<div class="content">
+{% if messages %}<div class="toast-stack">{% for message in messages %}<div class="toast {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+</div>
+</main></div>
+{% endwith %}
+<script>
+const s=document.getElementById('globalSearch'); if(s){s.addEventListener('keydown',e=>{if(e.key==='Enter'&&s.value.trim()) location.href='{% if nav.crm %}{% url "leads" %}{% endif %}?q='+encodeURIComponent(s.value.trim())})}
+setTimeout(()=>document.querySelectorAll('.toast').forEach(x=>x.remove()),4500);
+</script>
+{% block scripts %}{% endblock %}
+</body></html>

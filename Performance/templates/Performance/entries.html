@@ -1,0 +1,12 @@
+{% extends "leadplus_base.html" %}{% block title %}KPI entries · {{ emp.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PERFORMANCE</span><h1>KPI entries · {{ emp.full_name }}</h1><p>{{ month|date:"F Y" }} · manual KPIs only. Automatic KPIs are calculated from system data.</p></div><a class="ghost-btn" href="{% url 'performance_employee' emp.pk %}?month={{ month|date:'Y-m' }}">Back</a></div>
+<form method="post" class="card">{% csrf_token %}<input type="hidden" name="month" value="{{ month|date:'Y-m' }}">
+<div class="table-wrap"><table><thead><tr><th>KPI</th><th>Target</th><th>Actual</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><b>{{ r.kpi.name }}</b><br><small class="muted">{{ r.kpi.description }} {% if r.kpi.unit %}({{ r.kpi.unit }}){% endif %}</small></td>
+<td><input class="form-control" type="number" step="0.01" name="target_{{ r.kpi.pk }}" value="{% if r.entry and r.entry.target is not None %}{{ r.entry.target }}{% else %}{{ r.kpi.default_target }}{% endif %}"></td>
+<td><input class="form-control" type="number" step="0.01" name="actual_{{ r.kpi.pk }}" value="{% if r.entry and r.entry.actual is not None %}{{ r.entry.actual }}{% endif %}"></td></tr>
+{% empty %}<tr><td colspan="3"><div class="empty">No manual KPIs apply to this employee. Add some under KPI setup.</div></td></tr>{% endfor %}
+</tbody></table></div>
+<div class="form-footer"><button class="primary-btn">Save entries</button></div></form>
+{% endblock %}

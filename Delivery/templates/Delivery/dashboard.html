@@ -1,0 +1,31 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Delivery Workflow · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">DELIVERY CONTROL</span><h1>Work Flow</h1><p>Track accountability from BDE → BDM → Project Manager → execution team.</p></div></div>
+<div class="kpi-grid">
+  <div class="stat-card"><small>Total work</small><strong>{{ total }}</strong></div>
+  <div class="stat-card"><small>Waiting for BDM</small><strong>{{ pending_bdm }}</strong></div>
+  <div class="stat-card"><small>Waiting for PM</small><strong>{{ pending_pm }}</strong></div>
+  <div class="stat-card"><small>Active</small><strong>{{ active }}</strong></div>
+  <div class="stat-card"><small>Completed</small><strong>{{ completed }}</strong></div>
+  <div class="stat-card"><small>Overdue</small><strong>{{ overdue }}</strong></div>
+</div>
+<div class="panel">
+  <div class="panel-head"><h2>Work pipeline</h2><div class="filter-row">
+    <a href="{% url 'delivery_dashboard' %}">All</a>
+    {% for key,label in statuses %}<a href="?status={{ key }}">{{ label }}</a>{% endfor %}
+  </div></div>
+  <div class="table-wrap"><table><thead><tr><th>Work</th><th>BDE</th><th>BDM</th><th>Project Manager</th><th>Team</th><th>Status</th><th>Due</th><th>Progress</th></tr></thead><tbody>
+   {% for w in works %}
+   <tr><td><a href="{% url 'delivery_detail' w.pk %}"><b>{{ w.title }}</b></a><small>{{ w.service|default:"" }}</small></td>
+   <td>{% if w.bde %}{{ w.bde.get_full_name|default:w.bde.username }}{% else %}—{% endif %}</td>
+   <td>{% if w.bdm %}{{ w.bdm.get_full_name|default:w.bdm.username }}{% else %}Not assigned{% endif %}</td>
+   <td>{% if w.project_manager %}{{ w.project_manager.get_full_name|default:w.project_manager.username }}{% else %}Not assigned{% endif %}</td>
+   <td>{{ w.department|default:"—" }}</td>
+  <td><span class="status-pill">{{ w.get_status_display }}</span></td>
+  <td class="{% if w.is_overdue %}danger{% endif %}">{{ w.due_date|default:"—" }}</td>
+  <td>{{ w.progress }}%</td></tr>
+  {% empty %}<tr><td colspan="8">No delivery work found.</td></tr>{% endfor %}
+  </tbody></table></div>
+</div>
+{% endblock %}

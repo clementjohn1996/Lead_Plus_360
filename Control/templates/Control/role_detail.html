@@ -1,0 +1,23 @@
+{% extends "leadplus_base.html" %}{% block title %}{{ role.label }} · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">ROLE · LEVEL {{ role.level }}</span><h1>{{ role.label }}</h1><p>{{ role.description|default:"No description." }}</p></div>
+<div class="row-gap"><a class="ghost-btn" href="{% url 'roles' %}">Back</a><a class="primary-btn" href="{% url 'role_edit' role.pk %}">Edit</a></div></div>
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>Capabilities</h2></div></div><ul class="stack">
+<li>{% if role.is_super_admin %}✅{% else %}⛔{% endif %} Super Admin (everything)</li>
+<li>{% if role.can_use_crm %}✅{% else %}⛔{% endif %} Use CRM</li>
+<li>{% if role.sees_all_leads %}✅{% else %}⛔{% endif %} See all leads</li>
+<li>{% if role.sees_team_leads %}✅{% else %}⛔{% endif %} See team leads</li>
+<li>{% if role.can_manage_team %}✅{% else %}⛔{% endif %} Manage team</li>
+<li>{% if role.can_manage_hr %}✅{% else %}⛔{% endif %} Manage HR</li>
+<li>{% if role.is_privileged %}✅{% else %}⛔{% endif %} Privileged (only Super Admin can assign)</li>
+<li>{% if role.is_active %}✅{% else %}⛔{% endif %} Active</li></ul></section>
+<section class="card"><div class="card-head"><div><h2>People ({{ members|length }})</h2></div></div>
+<ul class="stack">{% for m in members %}<li>{{ m.user.get_full_name|default:m.user.username }} <small class="muted">{{ m.user.username }}</small></li>{% empty %}<li class="muted">Nobody has this role.</li>{% endfor %}</ul></section>
+</div>
+{% if not role.is_super_admin %}
+<section class="card" id="delete"><div class="card-head"><div><h2>Delete role</h2><p>This cannot be undone.{% if members %} Existing people are moved to the role you choose.{% endif %}</p></div></div>
+<form method="post" action="{% url 'role_delete' role.pk %}" class="row-gap" onsubmit="return confirm('Delete this role?')">{% csrf_token %}
+{% if members %}<select name="reassign_to" class="form-select" required><option value="">Move people to…</option>{% for o in others %}<option value="{{ o.pk }}">{{ o.label }}</option>{% endfor %}</select>{% endif %}
+<button class="danger-btn">Delete role</button></form></section>{% endif %}
+{% endblock %}

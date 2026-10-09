@@ -1,0 +1,13 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Departments · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PEOPLE & ORGANIZATION</span><h1>Departments</h1><p>Set the company structure used for employee assignment and delivery routing.</p></div></div>
+<div class="grid-2-1">
+<section class="card"><div class="card-head"><div><h2>Company departments</h2><p>These departments appear when HR creates or edits an employee.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>Department</th><th>Head</th><th>Employees</th><th>Purpose</th></tr></thead><tbody>
+{% for d in departments %}<tr><td><strong>{{ d.name }}</strong></td><td>{{ d.head.get_full_name|default:d.head.username|default:"Not assigned" }}</td><td>{{ d.employees.count }}</td><td>{{ d.description|default:"—" }}</td></tr>{% empty %}<tr><td colspan="4"><div class="empty">No departments configured.</div></td></tr>{% endfor %}
+</tbody></table></div></section>
+<section class="card"><div class="card-head"><div><h2>Add department</h2><p>Use this for new teams or business units.</p></div></div>
+<form method="post" class="lead-form">{% csrf_token %}<div class="field"><label>Department name</label><input class="form-control" name="name" required placeholder="e.g. Customer Success"></div><div class="field"><label>Description</label><textarea class="form-control" name="description" rows="4" placeholder="What does this department handle?"></textarea></div><button class="primary-btn">Create department</button></form></section>
+</div>
+{% endblock %}

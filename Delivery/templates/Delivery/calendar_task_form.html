@@ -1,0 +1,3 @@
+{% extends "leadplus_base.html" %}{% block title %}Edit Delivery Task · LeadPlus-360{% endblock %}{% block content %}
+<div class="page-head"><div><span class="eyebrow">{{plan.client_name}}</span><h1>{{task.title}}</h1><p>Set the production milestones and responsible team member.</p></div><a class="ghost-btn" href="{% url 'delivery_calendar_plan_edit' plan.pk %}">← Back to plan</a></div>
+<div class="card"><form method="post">{% csrf_token %}{{form.as_p}}<button class="primary-btn">Save task schedule</button></form></div>{% endblock %}

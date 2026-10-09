@@ -1,0 +1,469 @@
+{% extends "leadplus_base.html" %}{% load static %}{% block title %}User guide · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">HELP</span>
+    <h1>LeadPlus-360 User Guide</h1>
+  </div>
+  <button class="toc-toggle" aria-label="Table of contents" aria-expanded="false" aria-controls="guide-toc-list">
+    <span class="toc-toggle-icon">☰</span>
+    <span>Contents</span>
+    <span class="toc-toggle-chevron">▼</span>
+  </button>
+</div>
+
+<div class="guide-layout">
+  <nav class="guide-toc" aria-label="Table of contents" id="guide-toc-nav">
+    <div class="toc-header">
+      <h3>Contents</h3>
+      <button class="toc-close" aria-label="Close table of contents">✕</button>
+    </div>
+    <div id="guide-toc-list" class="toc-list">
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#roles">Roles & Permissions</a></li>
+        <li><a href="#getting-started">Getting Started</a></li>
+        <li><a href="#attendance">Attendance (Face + Geo)</a></li>
+        <li><a href="#crm">CRM — Leads & Pipeline</a></li>
+        <li><a href="#tasks">Follow-ups & Tasks</a></li>
+        <li><a href="#performance">Performance & KPIs</a></li>
+        <li><a href="#bde">BDE Targets & Appraisals</a></li>
+        <li><a href="#hr">HR — Employees & Onboarding</a></li>
+        <li><a href="#tv">TV Displays (Live Leaderboard)</a></li>
+        <li><a href="#admin">Super Admin — Configuration</a></li>
+        <li><a href="#first-day">Typical First-Day Setup</a></li>
+        <li><a href="#faq">FAQ & Troubleshooting</a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <div class="guide-content">
+
+<section id="overview" class="card">
+  <div class="card-head"><div><h2>1. Overview</h2></div></div>
+  <p>LeadPlus-360 is the internal operating system for our IT company (software & web development, digital marketing, SEO, ad-video production). It unifies four domains:</p>
+  <div class="grid-4">
+    <article class="feature"><i>■</i><h4>CRM</h4><p>Leads, pipeline, activities, follow-ups, quick-lead capture, exports.</p></article>
+    <article class="feature"><i>☺</i><h4>HR</h4><p>Employee directory, onboarding workflows, documents, task checklists.</p></article>
+    <article class="feature"><i>●</i><h4>Attendance</h4><p>AI face recognition, geo-fencing, punch in/out, monthly reports.</p></article>
+    <article class="feature"><i>★</i><h4>Performance</h4><p>KPI scoring, BDE targets, leaderboards, PIPs, TV wall display.</p></article>
+  </div>
+  <figure class="guide-img">
+    <img src="{% static 'guide/dashboard-overview.svg' %}" alt="Dashboard overview showing four modules" />
+    <figcaption>Fig 1 — Main dashboard with role-aware widgets</figcaption>
+  </figure>
+</section>
+
+<section id="roles" class="card">
+  <div class="card-head"><div><h2>2. Roles & Permissions</h2></div></div>
+  <p>Menus and data visibility are driven by <strong>Role</strong> (assigned in <em>Control Center → Users</em>). The hierarchy:</p>
+  <table class="role-table">
+    <thead><tr><th>Role</th><th>Level</th><th>CRM</th><th>Lead scope</th><th>Team mgmt</th><th>HR access</th><th>Super Admin</th></tr></thead>
+    <tbody>
+      <tr><td>Super Admin</td><td>1</td><td>✓</td><td>All</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Management</td><td>10</td><td>✓</td><td>All</td><td>✓</td><td>✓</td><td>—</td></tr>
+      <tr><td>HR Manager</td><td>20</td><td>—</td><td>—</td><td>—</td><td>✓</td><td>—</td></tr>
+      <tr><td>Project Manager</td><td>30</td><td>✓</td><td>All</td><td>✓</td><td>—</td><td>—</td></tr>
+      <tr><td>BD Manager</td><td>30</td><td>✓</td><td>All</td><td>✓</td><td>—</td><td>—</td></tr>
+      <tr><td>BD Team Lead</td><td>40</td><td>✓</td><td>Team</td><td>✓</td><td>—</td><td>—</td></tr>
+      <tr><td>BD Executive</td><td>50</td><td>✓</td><td>Own</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>Developer / Creative</td><td>60</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <figure class="guide-img">
+    <img src="{% static 'guide/roles-table.svg' %}" alt="Roles table in admin panel" />
+    <figcaption>Fig 2 — Roles & access screen (Super Admin only)</figcaption>
+  </figure>
+  <p><strong>Capabilities</strong> are toggled per role: <code>can_use_crm</code>, <code>sees_all_leads</code>, <code>sees_team_leads</code>, <code>can_manage_team</code>, <code>can_manage_hr</code>, <code>is_super_admin</code>. Only Super Admin may assign <em>privileged</em> roles.</p>
+</section>
+
+<section id="getting-started" class="card">
+  <div class="card-head"><div><h2>3. Getting Started</h2></div></div>
+  <h3>3.1 First login</h3>
+  <ol>
+    <li>Open <code>/login/</code> — use credentials provided by your admin.</li>
+    <li>On first visit you land on <strong>Home</strong> — widgets appear based on your role.</li>
+    <li>Open <strong>Profile</strong> (top-right avatar) → <em>Change password</em> immediately.</li>
+  </ol>
+  <figure class="guide-img">
+    <img src="{% static 'guide/login.svg' %}" alt="Login page" />
+    <figcaption>Fig 3 — Login screen</figcaption>
+  </figure>
+  <figure class="guide-img">
+    <img src="{% static 'guide/profile.svg' %}" alt="Profile page with password change" />
+    <figcaption>Fig 4 — Profile & password change</figcaption>
+  </figure>
+
+  <h3>3.2 Sidebar navigation</h3>
+  <p>The left sidebar shows only sections your role permits. Collapse on mobile with the <kbd>☰</kbd> button.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/sidebar.svg' %}" alt="Sidebar navigation" />
+    <figcaption>Fig 5 — Role-aware sidebar</figcaption>
+  </figure>
+</section>
+
+<section id="attendance" class="card">
+  <div class="card-head"><div><h2>4. Attendance (Face + Geo)</h2></div></div>
+  <h3>4.1 Face enrolment (one-time)</h3>
+  <ol>
+    <li>Open <strong>Attendance</strong> from sidebar.</li>
+    <li>Click <strong>Enrol face</strong> — allow camera permission.</li>
+    <li>Center your face in the oval; the system captures 15 frames.</li>
+    <li>Success toast appears; you can now punch.</li>
+  </ol>
+  <figure class="guide-img">
+    <img src="{% static 'guide/attendance-enrol.svg' %}" alt="Face enrolment screen" />
+    <figcaption>Fig 6 — Face enrolment (15-frame capture)</figcaption>
+  </figure>
+
+  <h3>4.2 Punch in / out</h3>
+  <ol>
+    <li>Open Attendance page.</li>
+    <li>Click <strong>Punch in</strong> (morning) or <strong>Punch out</strong> (evening).</li>
+    <li>Camera snapshots are taken for verification.</li>
+    <li>GPS is checked against allowed office radius.</li>
+  </ol>
+  <p><strong>Status badges:</strong> <span class="badge present">Present</span> <span class="badge late">Late</span> <span class="badge outside">Outside radius</span> <span class="badge missed">Missed</span></p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/attendance-punch.svg' %}" alt="Punch in/out screen" />
+    <figcaption>Fig 7 — Punch screen with live camera preview</figcaption>
+  </figure>
+
+  <h3>4.3 HR: Attendance today & Monthly report</h3>
+  <ul>
+    <li><strong>Attendance today</strong> — live list of present/late/absent with filter by department.</li>
+    <li><strong>Monthly report</strong> — calendar grid, export CSV, filter by employee/date range.</li>
+    <li><strong>Reset face</strong> — if an employee changes appearance, HR can trigger re-enrolment.</li>
+  </ul>
+  <figure class="guide-img">
+    <img src="{% static 'guide/attendance-monthly.svg' %}" alt="Monthly attendance report" />
+    <figcaption>Fig 8 — Monthly report with export</figcaption>
+  </figure>
+
+  <h3>4.4 Office locations (geo-fencing)</h3>
+  <p>HR/Admin define offices: name, address, <strong>latitude</strong>, <strong>longitude</strong>, <strong>radius (metres)</strong>. Punches outside radius are flagged <em>Outside radius</em>.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/office-locations.svg' %}" alt="Office locations management" />
+    <figcaption>Fig 9 — Office geofence configuration</figcaption>
+  </figure>
+</section>
+
+<section id="crm" class="card">
+  <div class="card-head"><div><h2>5. CRM — Leads & Pipeline</h2></div></div>
+  <h3>5.1 Lead list</h3>
+  <p>Filters: stage, source, assigned, date range, search by name/company/email/phone. Columns: name, company, stage, value, next follow-up, owner.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/lead-list.svg' %}" alt="Lead list with filters" />
+    <figcaption>Fig 10 — Lead list with stage filter</figcaption>
+  </figure>
+
+  <h3>5.2 Create / edit lead</h3>
+  <p>Fields: name, company, email, phone, source, stage, value, assigned to, tags, notes. <strong>Quick lead</strong> (⚡) captures minimal fields for speed.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/lead-form.svg' %}" alt="Lead create/edit form" />
+    <figcaption>Fig 11 — Lead form (full & quick)</figcaption>
+  </figure>
+
+  <h3>5.3 Pipeline view</h3>
+  <p>Kanban columns: New → Contacted → Qualified → Proposal → Negotiation → Won / Lost. Drag & drop to change stage; inline activity log on card click.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/pipeline.svg' %}" alt="Pipeline kanban board" />
+    <figcaption>Fig 12 — Pipeline kanban with drag-drop</figcaption>
+  </figure>
+
+  <h3>5.4 Activities & follow-ups</h3>
+  <p>Log call, meeting, email, WhatsApp, note. Set <strong>Next follow-up date</strong> — appears in <em>Follow-ups</em> list and on Home dashboard.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/activities.svg' %}" alt="Activity log on lead detail" />
+    <figcaption>Fig 13 — Activity timeline with follow-up scheduling</figcaption>
+  </figure>
+
+  <h3>5.5 Export leads</h3>
+  <p>CSV export respects current filters and user's lead scope.</p>
+</section>
+
+<section id="tasks" class="card">
+  <div class="card-head"><div><h2>6. Follow-ups & Tasks</h2></div></div>
+  <ul>
+    <li><strong>Follow-ups</strong> — auto-generated from lead next-follow-up dates. Mark complete, reschedule, or convert to task.</li>
+    <li><strong>Tasks</strong> — standalone to-dos assignable to any CRM user. Status: To-do / In progress / Done.</li>
+    <li><strong>Add task</strong> — quick create from sidebar or lead detail.</li>
+  </ul>
+  <figure class="guide-img">
+    <img src="{% static 'guide/tasks.svg' %}" alt="Tasks and follow-ups list" />
+    <figcaption>Fig 14 — Tasks & follow-ups unified view</figcaption>
+  </figure>
+</section>
+
+<section id="performance" class="card">
+  <div class="card-head"><div><h2>7. Performance & KPIs</h2></div></div>
+  <h3>7.1 Leaderboard</h3>
+  <p>Monthly score = Σ (KPI value × weight). Shown for current month; filter by role/department. Top 3 appear on manager Home.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/leaderboard.svg' %}" alt="Performance leaderboard" />
+    <figcaption>Fig 15 — Monthly leaderboard</figcaption>
+  </figure>
+
+  <h3>7.2 My performance</h3>
+  <p>Shows your score, rank, each KPI with actual vs target, trend sparkline.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/my-performance.svg' %}" alt="My performance detail" />
+    <figcaption>Fig 16 — Individual performance breakdown</figcaption>
+  </figure>
+
+  <h3>7.3 KPI setup (Admin/HR)</h3>
+  <p>Define KPIs per role: name, unit, target, weight, formula (manual entry or auto from CRM/attendance). Weights must sum to 100.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/kpi-setup.svg' %}" alt="KPI configuration" />
+    <figcaption>Fig 17 — KPI setup per role</figcaption>
+  </figure>
+</section>
+
+<section id="bde" class="card">
+  <div class="card-head"><div><h2>8. BDE Targets & Appraisals</h2></div></div>
+  <h3>8.1 BDE dashboard</h3>
+  <p>Business Development Executive targets: monthly revenue, leads created, conversion rate, activities. Progress bars update in real time.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/bde-dashboard.svg' %}" alt="BDE targets dashboard" />
+    <figcaption>Fig 18 — BDE targets with progress rings</figcaption>
+  </figure>
+
+  <h3>8.2 Calendar view</h3>
+  <p>Heatmap of daily activity counts; click a day to see logs.</p>
+
+  <h3>8.3 Appraisals</h3>
+  <p>Quarterly/annual review cycles: self-assessment → manager review → HR finalise. PDF export for records.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/appraisals.svg' %}" alt="Appraisal cycle" />
+    <figcaption>Fig 19 — Appraisal workflow</figcaption>
+  </figure>
+
+  <h3>8.4 Improvement plans (PIP)</h3>
+  <p>Create structured plan with milestones, check-in dates, owner. Track status: Active / Completed / Closed.</p>
+</section>
+
+<section id="hr" class="card">
+  <div class="card-head"><div><h2>9. HR — Employees & Onboarding</h2></div></div>
+  <h3>9.1 Employee directory</h3>
+  <p>List with filters: status, department, role. Click for detail: profile, documents, onboarding checklist, performance history.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/employee-list.svg' %}" alt="Employee directory" />
+    <figcaption>Fig 20 — Employee directory with filters</figcaption>
+  </figure>
+
+  <h3>9.2 Add employee (creates login + onboarding)</h3>
+  <ol>
+    <li><strong>Employees → New</strong> — fill personal, professional, role, department, manager.</li>
+    <li>System creates Django user, sends welcome email with temp password.</li>
+    <li>Onboarding checklist auto-generated from <em>Workflows</em> matching role/department.</li>
+  </ol>
+  <figure class="guide-img">
+    <img src="{% static 'guide/employee-create.svg' %}" alt="Add employee form" />
+    <figcaption>Fig 21 — New employee form (auto-generates onboarding)</figcaption>
+  </figure>
+
+  <h3>9.3 Onboarding board</h3>
+  <p>Kanban: Pending → In progress → Submitted → Approved. HR/manager approve steps marked <em>needs approval</em>.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/onboarding-board.svg' %}" alt="Onboarding kanban board" />
+    <figcaption>Fig 22 — Onboarding progress board</figcaption>
+  </figure>
+
+  <h3>9.4 Workflows (templates)</h3>
+  <p>Define checklist templates per role/department. Steps: title, description, assignee (self/HR/manager), approval required, order. Matching priority: role → department → default.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/workflows.svg' %}" alt="Workflow templates" />
+    <figcaption>Fig 23 — Onboarding workflow builder</figcaption>
+  </figure>
+
+  <h3>9.5 Documents</h3>
+  <p>Upload contracts, ID proofs, offer letters per employee. Categories: contract, id, certificate, other.</p>
+</section>
+
+<section id="tv" class="card">
+  <div class="card-head"><div><h2>10. TV Displays (Live Leaderboard)</h2></div></div>
+  <ol>
+    <li>Super Admin → <strong>TV displays → New</strong>.</li>
+    <li>Name it (e.g. "Main floor TV"), choose rotation interval (default 10s).</li>
+    <li>System generates a <strong>token URL</strong>: <code>/tv/<token>/</code>.</li>
+    <li>Open that URL on the office TV browser (full-screen, kiosk mode).</li>
+    <li>It cycles through employees showing name, role, photo, score, rank, top KPIs.</li>
+  </ol>
+  <p><strong>Security:</strong> Anyone with the link can view — keep it on internal network only.</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/tv-manage.svg' %}" alt="TV display management" />
+    <figcaption>Fig 24 — Create TV display token</figcaption>
+  </figure>
+  <figure class="guide-img">
+    <img src="{% static 'guide/tv-display.svg' %}" alt="TV display live view" />
+    <figcaption>Fig 25 — Live TV leaderboard rotating</figcaption>
+  </figure>
+</section>
+
+<section id="admin" class="card">
+  <div class="card-head"><div><h2>11. Super Admin — Configuration</h2></div></div>
+  <h3>11.1 Control Center</h3>
+  <p>Overview: user count, active roles, offices, quick actions (toggle active, set role, reset password).</p>
+  <figure class="guide-img">
+    <img src="{% static 'guide/control-center.svg' %}" alt="Control center" />
+    <figcaption>Fig 26 — Control Center dashboard</figcaption>
+  </figure>
+
+  <h3>11.2 Roles & access</h3>
+  <p>Create/edit roles, set capabilities, level (seniority), privileged flag. Assign permissions from Django auth.</p>
+
+  <h3>11.3 Onboarding workflows</h3>
+  <p>Build reusable checklists. See §9.4.</p>
+
+  <h3>11.4 KPI setup</h3>
+  <p>Define measurable KPIs per role with weights. See §7.3.</p>
+
+  <h3>11.5 TV displays</h3>
+  <p>Manage tokens, rotation speed, which roles/departments to show. See §10.</p>
+
+  <h3>11.6 Django admin</h3>
+  <p>Raw data access at <code>/admin/</code> — use sparingly.</p>
+</section>
+
+<section id="first-day" class="card">
+  <div class="card-head"><div><h2>12. Typical First-Day Setup (Super Admin)</h2></div></div>
+  <ol>
+    <li><strong>Office locations</strong> — add lat/lng/radius for each office (Attendance → Office locations).</li>
+    <li><strong>Review roles</strong> — verify capabilities match org chart (Control Center → Roles).</li>
+    <li><strong>Edit onboarding workflows</strong> — create checklists per role/dept (HR → Workflows).</li>
+    <li><strong>Set KPIs</strong> — define targets & weights per role (Admin → KPI setup).</li>
+    <li><strong>Add employees</strong> — HR → Employees → New (auto-creates login + onboarding).</li>
+    <li><strong>Face enrolment drive</strong> — ask all staff to open Attendance and enrol.</li>
+    <li><strong>Create TV display</strong> — generate token, open on office TV.</li>
+  </ol>
+  <figure class="guide-img">
+    <img src="{% static 'guide/setup-checklist.svg' %}" alt="First-day setup checklist" />
+    <figcaption>Fig 27 — Setup checklist</figcaption>
+  </figure>
+</section>
+
+<section id="faq" class="card">
+  <div class="card-head"><div><h2>13. FAQ & Troubleshooting</h2></div></div>
+  <dl>
+    <dt>Camera/location permission denied?</dt>
+    <dd>Browser settings → Site permissions → Allow camera & location for this origin. Refresh page.</dd>
+    <dt>Punch flagged "Outside radius"?</dt>
+    <dd>Check office coordinates in Admin → Office locations. Increase radius or correct GPS.</dd>
+    <dt>Face recognition fails?</dt>
+    <dd>Good lighting, face centred, no mask/glasses. HR can "Reset face" for re-enrolment.</dd>
+    <dt>Lead not visible?</dt>
+    <dd>Scope is role-based: Executives see own, Team Leads see team, Managers+ see all.</dd>
+    <dt>Performance score not updating?</dt>
+    <dd>KPIs recalculate on data entry. Force recalc: Admin → BDE → Recalculate.</dd>
+    <dt>TV display shows "Unauthorized"?</dt>
+    <dd>Token expired or revoked. Generate new token in TV displays.</dd>
+    <dt>Forgot password?</dt>
+    <dd>Admin can reset in Control Center; or use "Forgot password" on login (if email configured).</dd>
+  </dl>
+</section>
+
+  </div>
+</div>
+
+<style>
+.guide-layout{display:grid;grid-template-columns:260px 1fr;gap:32px;align-items:start}
+.guide-toc{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;position:sticky;top:100px;max-height:calc(100vh-120px);overflow:auto}
+.toc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.toc-header h3{margin:0;font-size:14px;color:#334155}
+.toc-close{display:none;background:none;border:none;font-size:18px;cursor:pointer;color:#64748b;padding:4px;line-height:1}
+.toc-list ol{margin:0;padding-left:20px}
+.toc-list a{color:#2563eb;text-decoration:none;font-size:13px;line-height:1.8;display:block}
+.toc-list a:hover{text-decoration:underline}
+.guide-content{min-width:0}
+.card{margin-bottom:24px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e2e8f0}
+.card-head h2{margin:0;font-size:18px;color:#0f172a}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding:16px 20px}
+.feature{text-align:center;padding:16px;background:#f8fafc;border-radius:8px}
+.feature i{font-size:28px;display:block;margin-bottom:8px}
+.feature h4{margin:0 0 4px;font-size:14px;color:#1e293b}
+.feature p{margin:0;font-size:12px;color:#64748b}
+.role-table{width:100%;border-collapse:collapse;font-size:13px;padding:0 20px 20px}
+.role-table th,.role-table td{padding:8px 10px;text-align:left;border-bottom:1px solid #e2e8f0}
+.role-table th{background:#f8fafc;color:#334155;font-weight:600}
+.role-table td{color:#1e293b}
+.guide-img{margin:16px 20px 0;text-align:center}
+.guide-img img{max-width:100%;height:auto;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.guide-img figcaption{margin-top:8px;font-size:12px;color:#64748b}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge.present{background:#dcfce7;color:#166534}
+.badge.late{background:#fef3c7;color:#92400e}
+.badge.outside{background:#fee2e2;color:#991b1b}
+.badge.missed{background:#f3f4f6;color:#374151}
+dl{padding:0 20px 20px}
+dt{font-weight:600;color:#1e293b;margin-top:16px}
+dd{margin:4px 0 0;color:#475569;font-size:14px;line-height:1.6}
+kbd{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px}
+
+/* TOC toggle button (mobile) */
+.toc-toggle{display:none;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;color:#334155;cursor:pointer}
+.toc-toggle:hover{background:#f8fafc}
+.toc-toggle[aria-expanded="true"] .toc-toggle-chevron{transform:rotate(180deg)}
+.toc-toggle-chevron{display:inline-block;transition:transform .2s;font-size:10px}
+
+/* Mobile dropdown */
+@media (max-width: 992px){
+  .guide-layout{grid-template-columns:1fr}
+  .guide-toc{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:#fff;border-radius:0;border-left:none;border-right:none;box-shadow:0 4px 20px rgba(0,0,0,.15);transform:translateX(-100%);transition:transform .3s ease;max-height:none;overflow:auto;padding:0}
+  .guide-toc.open{transform:translateX(0)}
+  .toc-header{padding:16px 20px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;background:#fff;z-index:1}
+  .toc-close{display:block}
+  .toc-list{padding:16px 20px}
+  .toc-toggle{display:flex}
+  .guide-content{padding-top:0}
+  .page-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .page-head h1{margin:0}
+}
+@media (max-width: 768px){
+  .grid-4{grid-template-columns:1fr}
+}
+</style>
+{% endblock %}
+{% block scripts %}
+<script>
+  // TOC toggle for mobile
+  const tocToggle = document.querySelector('.toc-toggle');
+  const tocNav = document.getElementById('guide-toc-nav');
+  const tocClose = document.querySelector('.toc-close');
+  const tocLinks = document.querySelectorAll('.toc-list a');
+
+  function openToc() {
+    tocNav.classList.add('open');
+    tocToggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeToc() {
+    tocNav.classList.remove('open');
+    tocToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  tocToggle?.addEventListener('click', () => {
+    tocNav.classList.contains('open') ? closeToc() : openToc();
+  });
+  tocClose?.addEventListener('click', closeToc);
+
+  // Close on link click (mobile)
+  tocLinks.forEach(a => a.addEventListener('click', closeToc));
+
+  // Close on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && tocNav?.classList.contains('open')) closeToc();
+  });
+
+  // Smooth scroll for TOC links
+  document.querySelectorAll('.toc-list a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) { el.scrollIntoView({behavior:'smooth', block:'start'}); history.pushState(null, '', a.getAttribute('href')); }
+    });
+  });
+</script>
+{% endblock %}

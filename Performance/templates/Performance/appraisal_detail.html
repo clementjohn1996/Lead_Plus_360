@@ -1,0 +1,10 @@
+{% extends "leadplus_base.html" %}{% block title %}Appraisal · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">APPRAISAL · {{ a.get_decision_display|upper }}</span><h1>{{ a.employee.full_name }}</h1><p>{{ a.period_start|date:"M Y" }} - {{ a.period_end|date:"M Y" }}</p></div><a class="ghost-btn" href="{% url 'bde_profile' a.employee.pk %}">BDE profile</a></div>
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>Performance history</h2></div></div><p>{{ a.history }}</p><p><b>Average achievement</b>: {{ a.avg_achievement }}%</p><p><span class="pill c-green">{{ a.green_months }} Green</span> <span class="pill c-yellow">{{ a.yellow_months }} Yellow</span> <span class="pill c-red">{{ a.red_months }} Red</span></p>
+{% if not form %}<p><b>Comments</b><br>{{ a.manager_comments|linebreaksbr|default:"-" }}</p><p><b>Strengths</b><br>{{ a.strengths|linebreaksbr|default:"-" }}</p><p><b>Improvement areas</b><br>{{ a.improvement_areas|linebreaksbr|default:"-" }}</p>{% endif %}</section>
+{% if form %}<section class="card"><div class="card-head"><div><h2>Review</h2></div></div><form method="post" class="stack">{% csrf_token %}{{ form.non_field_errors }}
+{% for f in form %}<div class="field"><label>{{ f.label }}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}<button class="primary-btn">Save</button></form></section>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "leadplus_base.html" %}{% block title %}Control center · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">SUPER ADMIN</span><h1>Control center</h1><p>Manage users, roles, office locations and workflows from one place.</p></div>
+<div class="row-gap"><a class="primary-btn" href="{% url 'hr_employee_create' %}">＋ Add user</a><a class="ghost-btn" href="{% url 'attendance_offices' %}">＋ Add office location</a></div></div>
+<div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px">
+<a class="card" href="{% url 'attendance_offices' %}"><h3>Office locations</h3><p>{{ offices }} configured &middot; add, edit, set radius</p></a>
+<a class="card" href="{% url 'roles' %}"><h3>Roles &amp; access</h3><p>{{ role_count }} roles &middot; create and edit</p></a>
+<a class="card" href="{% url 'hr_workflows' %}"><h3>Onboarding workflows</h3><p>Steps and approvals</p></a>
+<a class="card" href="{% url 'hr_employees' %}"><h3>Employees</h3><p>Profiles, manager, shift</p></a>
+<a class="card" href="{% url 'performance_kpis' %}"><h3>KPI setup</h3><p>What is measured</p></a>
+<a class="card" href="{% url 'pip_list' %}"><h3>Improvement plans</h3><p>PIPs for low performers</p></a>
+<a class="card" href="{% url 'performance_tv_manage' %}"><h3>TV displays</h3><p>Public performance screens</p></a>
+</div>
+<section class="card"><div class="card-head"><div><h2>Users</h2><p>Change role, deactivate or reset password.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+{% for u in users %}<tr><td><b>{{ u.get_full_name|default:u.username }}</b><small> {{ u.username }}</small></td>
+<td><form method="post" action="{% url 'user_action' u.pk %}" class="row-gap">{% csrf_token %}<input type="hidden" name="action" value="set_role"><select name="role" class="form-select">{% for r in roles %}<option value="{{ r.pk }}" {% if u.profile.role_id == r.pk %}selected{% endif %}>{{ r.label }}</option>{% endfor %}</select>{% if u.profile.role_id == None %}<span class="pill none">No role</span> {% endif %}<button class="ghost-btn">Save</button></form></td>
+<td>{% if u.is_active %}<span class="pill active">Active</span>{% else %}<span class="pill none">Deactivated</span>{% endif %}</td>
+<td class="row-gap"><form method="post" action="{% url 'user_action' u.pk %}">{% csrf_token %}<input type="hidden" name="action" value="toggle_active"><button class="ghost-btn">{% if u.is_active %}Deactivate{% else %}Activate{% endif %}</button></form>
+<form method="post" action="{% url 'user_action' u.pk %}" class="row-gap">{% csrf_token %}<input type="hidden" name="action" value="set_password"><input type="password" name="password" placeholder="New password" autocomplete="new-password" required><button class="ghost-btn">Reset</button></form>
+{% if u.employee %}<a class="text-link" href="{% url 'hr_employee_edit' u.employee.pk %}">Edit</a>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

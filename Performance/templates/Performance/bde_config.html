@@ -1,0 +1,13 @@
+{% extends "leadplus_base.html" %}{% load humanize %}{% block title %}BDE settings · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PERFORMANCE</span><h1>BDE targets &amp; rules</h1><p>Defaults: ₹2,00,000 target, 10 slabs, Red 1-5, Yellow 6-8, Green 9-10, PIP after 2 Red or 4 Yellow months in a row, 4-month window.</p></div><a class="ghost-btn" href="{% url 'bde_dashboard' %}">Dashboard</a></div>
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>Rules</h2></div></div><form method="post" class="stack">{% csrf_token %}<input type="hidden" name="form" value="config">{{ form.non_field_errors }}
+{% for f in form %}<div class="field"><label>{{ f.label }}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}{% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}</div>{% endfor %}
+<button class="primary-btn">Save rules</button></form></section>
+<section class="card"><div class="card-head"><div><h2>Individual targets</h2><p>Default is ₹{{ cfg.default_target|floatformat:0|intcomma }}. Each slab = target / {{ cfg.slabs }}.</p></div></div>
+{% for r in rows %}<form method="post" action="{% url 'bde_target_update' r.employee.pk %}" class="alert-row">{% csrf_token %}<span><b>{{ r.employee.full_name }}</b>{% if r.custom %} <small class="muted">custom</small>{% endif %}</span><span class="row-gap"><input name="target" class="form-control" style="width:130px" value="{{ r.target|floatformat:0 }}"><button class="ghost-btn">Set</button>{% if r.custom %}<button class="ghost-btn" name="reset" value="1">Use default</button>{% endif %}</span></form>
+{% empty %}<p class="muted">No BDEs yet.</p>{% endfor %}
+<form method="post" action="{% url 'bde_recalculate' %}" style="margin-top:14px">{% csrf_token %}<input type="hidden" name="next" value="bde_config"><button class="primary-btn">Recalculate performance</button></form></section>
+</div>
+{% endblock %}

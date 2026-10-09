@@ -1,0 +1,20 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Add task · {{ start_date|date:"M j, Y" }}{% endblock %}
+{% block content %}
+<div class="wc-shell">
+  <div class="page-head">
+    <div><span class="eyebrow">WORK CALENDAR</span><h1>Add delivery task</h1><p>Schedule a new task starting on {{ start_date|date:"M j, Y" }}.</p></div>
+    <a class="ghost-btn" href="{% url 'delivery_calendar_date' start_date|date:'Y-m-d' %}">← Back to {{ start_date|date:"M j" }}</a>
+  </div>
+  <form method="post" class="card">{% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for f in form %}
+    <div class="field"><label>{{ f.label }}{% if f.field.required %} *{% endif %}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}{% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}</div>
+    {% endfor %}
+    <div class="row-gap" style="margin-top:16px">
+      <button class="primary-btn">Save task</button>
+      <a class="ghost-btn" href="{% url 'delivery_calendar_date' start_date|date:'Y-m-d' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

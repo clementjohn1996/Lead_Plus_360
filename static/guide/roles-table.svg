@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect width="800" height="450" fill="#f8fafc"/>
+  <rect x="40" y="40" width="720" height="370" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="400" y="90" font-family="system-ui" font-size="18" font-weight="600" fill="#1e293b" text-anchor="middle">Roles & Access</text>
+  <text x="400" y="120" font-family="system-ui" font-size="13" fill="#64748b" text-anchor="middle">Super Admin only — create roles, set capabilities, assign permissions</text>
+  <!-- Table header -->
+  <rect x="60" y="150" width="680" height="40" rx="4" fill="#2563eb"/>
+  <text x="120" y="175" font-family="system-ui" font-size="12" font-weight="600" fill="white">Role</text>
+  <text x="250" y="175" font-family="system-ui" font-size="12" font-weight="600" fill="white">Level</text>
+  <text x="340" y="175" font-family="system-ui" font-size="12" font-weight="600" fill="white">CRM</text>
+  <text x="410" y="175" font-family="system-ui" font-size="12" font-weight="600" fill="white">Lead Scope</text>
+  <text x="510" y="175" font-family="system-ui" font-size="12" font-weight="600" fill="white">Team Mgmt</text>
+  <text x="610" y="175" font-family="system-ui" font-size="12" font-weight="600" fill="white">HR Access</text>
+  <text x="690" y="175" font-family="system-ui" font-size="12" font-weight="600" fill="white">Super Admin</text>
+  <!-- Table rows -->
+  <g font-family="system-ui" font-size="12" fill="#1e293b">
+    <text x="120" y="215" text-anchor="middle">Super Admin</text>
+    <text x="250" y="215" text-anchor="middle">1</text>
+    <text x="340" y="215" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="410" y="215" text-anchor="middle">All</text>
+    <text x="510" y="215" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="610" y="215" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="690" y="215" text-anchor="middle" fill="#16a34a">✓</text>
+    
+    <text x="120" y="255" text-anchor="middle">Management</text>
+    <text x="250" y="255" text-anchor="middle">10</text>
+    <text x="340" y="255" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="410" y="255" text-anchor="middle">All</text>
+    <text x="510" y="255" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="610" y="255" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="690" y="255" text-anchor="middle" fill="#ef4444">—</text>
+    
+    <text x="120" y="295" text-anchor="middle">HR Manager</text>
+    <text x="250" y="295" text-anchor="middle">20</text>
+    <text x="340" y="295" text-anchor="middle" fill="#ef4444">—</text>
+    <text x="410" y="295" text-anchor="middle">—</text>
+    <text x="510" y="295" text-anchor="middle" fill="#ef4444">—</text>
+    <text x="610" y="295" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="690" y="295" text-anchor="middle" fill="#ef4444">—</text>
+    
+    <text x="120" y="335" text-anchor="middle">BD Team Lead</text>
+    <text x="250" y="335" text-anchor="middle">40</text>
+    <text x="340" y="335" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="410" y="335" text-anchor="middle">Team</text>
+    <text x="510" y="335" text-anchor="middle" fill="#16a34a">✓</text>
+    <text x="610" y="335" text-anchor="middle" fill="#ef4444">—</text>
+    <text x="690" y="335" text-anchor="middle" fill="#ef4444">—</text>
+    
+    <text x="120" y="375" text-anchor="middle">Developer</text>
+    <text x="250" y="375" text-anchor="middle">60</text>
+    <text x="340" y="375" text-anchor="middle" fill="#ef4444">—</text>
+    <text x="410" y="375" text-anchor="middle">—</text>
+    <text x="510" y="375" text-anchor="middle" fill="#ef4444">—</text>
+    <text x="610" y="375" text-anchor="middle" fill="#ef4444">—</text>
+    <text x="690" y="375" text-anchor="middle" fill="#ef4444">—</text>
+  </g>
+  <text x="400" y="430" font-family="system-ui" font-size="11" fill="#94a3b8" text-anchor="middle">[Placeholder — replace with actual screenshot]</text>
+</svg>

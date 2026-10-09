@@ -1,0 +1,26 @@
+{% extends "leadplus_base.html" %}{% load humanize %}{% block title %}BDE performance · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PERFORMANCE</span><h1>BDE performance &amp; targets</h1><p>{{ month|date:"F Y" }} · slabs of {{ cfg.slabs }}: Red 1-{{ cfg.red_max }}, Yellow {{ cfg.red_max|add:1 }}-{{ cfg.yellow_max }}, Green {{ cfg.yellow_max|add:1 }}-{{ cfg.slabs }}. Facts for management review, not automatic decisions.</p></div>
+<div class="row-gap"><a class="ghost-btn" href="{% url 'bde_calendar' %}">Calendar</a><a class="ghost-btn" href="{% url 'bde_appraisals' %}">Appraisals</a>{% if is_hr %}<a class="ghost-btn" href="{% url 'pip_list' %}">PIP list</a><a class="ghost-btn" href="{% url 'bde_config' %}">Settings &amp; targets</a><a class="ghost-btn" href="{% url 'bde_audit' %}">Audit log</a>{% endif %}<a class="ghost-btn" href="{% url 'bde_export' %}">Export CSV</a>
+{% if is_hr %}<form method="post" action="{% url 'bde_recalculate' %}">{% csrf_token %}<button class="primary-btn">Recalculate performance</button></form>{% endif %}</div></div>
+<div class="bde-stats">
+<div class="bde-stat"><b>{{ d.total }}</b><span>Total BDEs</span></div>
+<div class="bde-stat"><b>{{ d.on_target }}</b><span>On target (100%+)</span></div>
+<div class="bde-stat"><b>{{ d.below }}</b><span>Below target</span></div>
+<div class="bde-stat"><b>{{ d.counts.pip }}</b><span>In PIP</span></div>
+<div class="bde-stat"><b>{{ d.counts.appraisal }}</b><span>Appraisal eligible</span></div>
+<div class="bde-stat"><b>{{ d.counts.neutral }}</b><span>Neutral</span></div>
+<div class="bde-stat"><b>₹{{ d.target|floatformat:0|intcomma }}</b><span>Total monthly target</span></div>
+<div class="bde-stat"><b>₹{{ d.revenue|floatformat:0|intcomma }}</b><span>Achieved</span></div>
+<div class="bde-stat"><b>{{ d.pct }}%</b><span>Overall achievement</span></div>
+</div>
+{% if alerts %}<section class="card"><div class="card-head"><div><h2>Alerts</h2></div><form method="post" action="{% url 'bde_alerts_clear' %}">{% csrf_token %}<button class="ghost-btn">Mark all read</button></form></div>
+{% for a in alerts %}<div class="alert-row"><span>{{ a.message }}</span><small class="muted">{{ a.created_at|date:"d M" }}</small></div>{% endfor %}</section><br>{% endif %}
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Target</th><th>Achieved</th><th>%</th><th>Slab</th><th style="min-width:230px">Progress</th><th>Colour</th><th>Status</th></tr></thead><tbody>
+{% for r in d.rows %}<tr><td><a href="{% url 'bde_profile' r.employee.pk %}"><b>{{ r.employee.full_name }}</b></a>{% if r.open_pip %} <a class="pill pip" href="{% url 'pip_detail' r.open_pip.pk %}">PIP</a>{% endif %}</td>
+{% if r.record %}<td>₹{{ r.record.target|floatformat:0|intcomma }}</td><td>₹{{ r.record.revenue|floatformat:0|intcomma }}</td><td>{{ r.record.achievement_pct }}%{% if r.record.achievement_pct > 100 %}<br><small class="exceeded">Target exceeded</small>{% endif %}</td><td>{{ r.record.slab }}/{{ cfg.slabs }}</td>
+<td>{% include "Performance/_segments.html" with segs=r.segments %}</td><td><span class="pill c-{{ r.record.effective_colour }}">{{ r.record.effective_colour|title }}</span></td>
+{% else %}<td colspan="6" class="muted">No record yet. Use Recalculate.</td>{% endif %}
+<td><span class="pill {{ r.status }}" title="{{ r.reason }}">{{ r.status_label }}</span></td></tr>
+{% empty %}<tr><td colspan="8"><div class="empty">No Business Development Executives found. Give a user the BDE role and an employee record.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "leadplus_base.html" %}{% block title %}Employee created · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">HR</span><h1>{{ employee.full_name }} added</h1><p>Employee code {{ employee.employee_code }}. Onboarding checklist has been generated.</p></div></div>
+<section class="card"><h2>Login credentials</h2>
+<p class="muted">Share these with the employee securely. The password is shown only once and is not stored in readable form.</p>
+<p>Username<br><span class="secret">{{ employee.user.username }}</span></p>
+<p>Temporary password<br><span class="secret">{{ password }}</span></p>
+<p class="muted">They should change it from their profile after signing in, then enroll their face on the Attendance page.</p>
+<div class="row-gap"><a class="primary-btn" href="{% url 'hr_employee_detail' employee.pk %}">Open employee</a><a class="ghost-btn" href="{% url 'hr_employee_create' %}">Add another</a></div></section>
+{% endblock %}

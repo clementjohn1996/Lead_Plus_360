@@ -1,0 +1,21 @@
+{% extends "leadplus_base.html" %}{% block title %}Attendance today · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">HR</span><h1>Attendance · {{ day|date:"D, d M Y" }}</h1><p>Who is in, who is late, and any failed punch attempts.</p></div>
+<form class="inline-form"><input type="date" name="date" value="{{ day|date:'Y-m-d' }}" class="form-control" onchange="this.form.submit()"><a class="ghost-btn" href="{% url 'attendance_monthly' %}">Monthly report</a></form></div>
+<div class="summary-row">
+<div class="chip"><small>Employees</small><b>{{ summary.total }}</b></div><div class="chip"><small>Present</small><b>{{ summary.present }}</b></div>
+<div class="chip"><small>Late</small><b>{{ summary.late }}</b></div><div class="chip"><small>Half day</small><b>{{ summary.half_day }}</b></div>
+<div class="chip"><small>Not in</small><b>{{ summary.absent }}</b></div></div><br>
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Status</th><th>In</th><th>Out</th><th>Location</th><th>Face</th><th>Photos</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><a class="lead-name" href="{% url 'hr_employee_detail' r.emp.pk %}">{{ r.emp.full_name }}<small>{{ r.emp.employee_code }}</small></a></td>
+{% if r.rec %}<td><span class="pill {{ r.rec.status }}">{{ r.rec.get_status_display }}</span></td><td>{{ r.rec.check_in|time:"H:i"|default:"—" }}</td><td>{{ r.rec.check_out|time:"H:i"|default:"—" }}</td>
+<td>{% if r.rec.in_within_geofence %}{{ r.rec.office.name|default:"Office" }}{% elif r.rec.in_distance_m is not None %}Outside · {{ r.rec.in_distance_m|floatformat:0 }} m{% else %}—{% endif %}</td>
+<td>{{ r.rec.in_face_score|floatformat:2|default:"—" }}</td>
+<td>{% if r.rec.in_snapshot %}<a class="text-link" target="_blank" href="{% url 'attendance_snapshot' r.rec.pk 'in' %}">In</a>{% endif %} {% if r.rec.out_snapshot %}<a class="text-link" target="_blank" href="{% url 'attendance_snapshot' r.rec.pk 'out' %}">Out</a>{% endif %}</td>
+{% else %}<td><span class="pill absent">{% if is_today %}Not in yet{% else %}Absent{% endif %}</span></td><td colspan="5"></td>{% endif %}</tr>
+{% endfor %}</tbody></table></div></section>
+<section class="card"><div class="card-head"><div><h2>Failed attempts (last 24h)</h2><p>Repeated failures may indicate someone punching for another person.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>When</th><th>Employee</th><th>Type</th><th>Reason</th></tr></thead><tbody>
+{% for f in failures %}<tr><td>{{ f.created_at|date:"d M H:i" }}</td><td>{{ f.employee.full_name }}</td><td>{{ f.get_kind_display }}</td><td>{{ f.reason }}</td></tr>
+{% empty %}<tr><td colspan="4"><div class="empty">No failed attempts.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

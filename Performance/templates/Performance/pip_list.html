@@ -1,0 +1,11 @@
+{% extends "leadplus_base.html" %}{% block title %}Improvement plans · LeadPlus-360{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PERFORMANCE</span><h1>Performance improvement plans</h1><p>Support employees who are below target with clear goals, check-ins and a review date.</p></div>{% if is_hr %}<a class="primary-btn" href="{% url 'pip_create' %}">＋ New plan</a>{% endif %}</div>
+{% if at_risk %}<section class="card"><div class="card-head"><div><h2>Suggested: below {{ threshold }} this month</h2><p>No active plan yet.</p></div></div>
+<div class="table-wrap"><table><tbody>{% for r in at_risk %}<tr><td><b>{{ r.employee.full_name }}</b><small> {{ r.employee.department.name|default:"" }}</small></td><td>Score {{ r.score }}</td><td>{% if is_hr %}<a class="primary-btn small" href="{% url 'pip_create' %}?employee={{ r.employee.pk }}">Start plan</a>{% endif %}</td></tr>{% endfor %}</tbody></table></div></section><br>{% endif %}
+<section class="card filters"><form class="inline-form"><select name="status" class="form-select" onchange="this.form.submit()"><option value="open" {% if status == 'open' %}selected{% endif %}>Open plans</option><option value="all" {% if status == 'all' %}selected{% endif %}>All plans</option>{% for k,l in statuses %}<option value="{{ k }}" {% if status == k %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></form></section>
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Started</th><th>Review</th><th>Score</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in plans %}<tr><td><b>{{ p.employee.full_name }}</b><small> {{ p.employee.department.name|default:"" }}</small></td><td>{{ p.start_date|date:"d M Y" }}</td><td>{{ p.review_date|date:"d M Y" }}{% if p.is_overdue %} <span class="pill lost">Overdue</span>{% endif %}</td><td>{{ p.start_score|default_if_none:"—" }} → target {{ p.target_score }}</td><td><span class="pill">{{ p.get_status_display }}</span></td>
+<td class="row-gap"><a class="ghost-btn" href="{% url 'pip_detail' p.pk %}">Open</a></td></tr>
+{% empty %}<tr><td colspan="6"><div class="empty">No improvement plans.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}
