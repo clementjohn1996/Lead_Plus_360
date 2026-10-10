@@ -1,32 +1,14 @@
 @echo off
-REM Load demo contents for LeadPlus360
-REM Usage: load_demo_data.bat [options]
-REM   --fresh     Reset DB and load fresh demo data (use in dev only)
-REM   --demo      Load demo data without resetting (safe for existing data)
-REM   --migrations Apply migrations before seeding
+REM Demo data seeding is intentionally disabled in this project.
+REM Use install.bat to create a clean super admin account.
 cd /d "%~dp0"
 
-call venv\Scripts\activate.bat
-
-REM Optionally apply migrations
-if /I "%1"=="--migrations" (
-    echo.
-    echo === Applying migrations ===
-    call python manage.py migrate
-)
-
-REM Seed demo data
-if /I "%1"=="--fresh" (
-    echo.
-    echo === Loading fresh demo data (flushes existing) ===
-    call python manage.py seed_demo_data --fresh-demo
-) else (
-    echo.
-    echo === Loading demo data ===
-    call python manage.py seed_demo_data
-)
-
+echo ======================================================================
+echo LeadPlus360 demo data loading is disabled.
+ echo ======================================================================
 echo.
-echo === Done ===
-deactivate
+echo This installation is intended to start from a clean database only.
+echo Run install.bat and enter your own super admin credentials.
+echo.
 pause
+exit /b 0

@@ -24,10 +24,13 @@ def can_view_work(user, work):
     return user in {work.bde, work.bdm, work.project_manager} or work.assignments.filter(employee=user).exists()
 
 def can_assign_pm(user, work):
-    return is_admin(user) or role_name(user) in {"management","bd_manager","project_manager"} and user == work.bdm or role_name(user) in {"management","project_manager"}
+    role = role_name(user)
+    return is_admin(user) or role in {"management", "bd_manager"} or user == work.bdm
+
 
 def can_assign_team(user, work):
-    return is_admin(user) or role_name(user) in {"management","project_manager"} and user == work.project_manager or role_name(user) == "project_manager"
+    role = role_name(user)
+    return is_admin(user) or role == "management" or (role == "project_manager" and user == work.project_manager)
 
 def dashboard(request):
     if not can_access(request.user):

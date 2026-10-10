@@ -10,13 +10,23 @@ Internal operations platform for an IT services company (software & web app deve
 - **TV display** - a secret URL `/tv/<token>/` that cycles through each employee's performance. Create it in Performance > TV displays.
 
 ## Setup
+Use the installer for a clean database and an initial super admin account:
+
+```bat
+install.bat
+```
+
+The installer asks for the initial super admin username, email and password, clears any existing SQLite database, creates the standard org roles, and starts the app without seeding demo data.
+
+If you prefer to set it up manually:
+
 ```bash
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py sync_employees   # employee records for existing users
-python manage.py createsuperuser
+python manage.py bootstrap_admin --username admin --password Admin@12345 --email admin@leadplus360.local
 python manage.py runserver
 ```
 

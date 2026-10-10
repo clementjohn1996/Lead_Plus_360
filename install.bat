@@ -3,17 +3,34 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 title LeadPlus360 Installer
 
-set "ADMIN_USERNAME=%ADMIN_USERNAME%"
-set "ADMIN_PASSWORD=%ADMIN_PASSWORD%"
-set "ADMIN_EMAIL=%ADMIN_EMAIL%"
-if "%ADMIN_USERNAME%"=="" set "ADMIN_USERNAME=admin"
-if "%ADMIN_PASSWORD%"=="" set "ADMIN_PASSWORD=Admin@12345"
-if "%ADMIN_EMAIL%"=="" set "ADMIN_EMAIL=admin@leadplus360.local"
+REM Always begin from a clean local database. Demo/test data is intentionally disabled.
+if exist "db.sqlite3" del /f /q "db.sqlite3"
+if exist "db.sqlite3-journal" del /f /q "db.sqlite3-journal"
+if exist "db.sqlite3-shm" del /f /q "db.sqlite3-shm"
+if exist "db.sqlite3-wal" del /f /q "db.sqlite3-wal"
+
+set "ADMIN_USERNAME="
+set "ADMIN_PASSWORD="
+set "ADMIN_EMAIL="
 
 echo ============================================================
 echo          LEADPLUS360 - INSTALL AND START
  echo ============================================================
 echo Project: %CD%
+echo.
+echo This installer creates a clean database and a fresh super admin account.
+echo Demo data seeding is disabled.
+echo.
+
+set /p ADMIN_USERNAME=Super admin username [admin]: 
+if "%ADMIN_USERNAME%"=="" set "ADMIN_USERNAME=admin"
+
+set /p ADMIN_EMAIL=Super admin email [admin@leadplus360.local]: 
+if "%ADMIN_EMAIL%"=="" set "ADMIN_EMAIL=admin@leadplus360.local"
+
+set /p ADMIN_PASSWORD=Super admin password [leave blank for Admin@12345]: 
+if "%ADMIN_PASSWORD%"=="" set "ADMIN_PASSWORD=Admin@12345"
+
 echo.
 
 python --version >nul 2>&1
@@ -39,7 +56,7 @@ if not exist "requirements.txt" (
 
 echo [2/7] Installing dependencies...
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install --prefer-binary -r requirements.txt
 if errorlevel 1 goto :fail
 
 echo [2.5/7] Verifying required Python packages...
