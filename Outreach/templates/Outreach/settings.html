@@ -1,0 +1,10 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Signals &amp; settings · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>Signals &amp; settings</h1><p>You decide what the system may look for and how much it may send.{% if not can_edit %} Only managers and admins can change these.{% endif %}</p></div></div>
+<form method="post" class="lead-form">{% csrf_token %}
+<section class="card"><div class="card-head"><div><h2>Website signals to collect</h2><p>Only public homepage facts. Tick the ones you confirm are fair to use.</p></div></div>
+{% for key, label, desc in signal_rows %}<label class="check-item" style="cursor:pointer"><input type="checkbox" name="signals" value="{{ key }}" {% if key in confirmed %}checked{% endif %} {% if not can_edit %}disabled{% endif %}><div class="body"><b>{{ label }}</b><br><small>{{ desc }}</small></div></label>{% endfor %}</section>
+<section class="card"><div class="card-head"><div><h2>Sending</h2></div></div><div class="form-grid">{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}</div>
+{% if can_edit %}<button class="primary-btn">Save settings</button>{% endif %}</section></form>
+{% endblock %}

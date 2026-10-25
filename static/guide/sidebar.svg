@@ -8,7 +8,7 @@
   <!-- Brand -->
   <rect x="70" y="160" width="220" height="50" rx="4" fill="#1e293b"/>
   <text x="100" y="188" font-family="system-ui" font-size="14" font-weight="700" fill="white">L</text>
-  <text x="150" y="188" font-family="system-ui" font-size="14" font-weight="600" fill="white">LeadPlus-360</text>
+  <text x="150" y="188" font-family="system-ui" font-size="14" font-weight="600" fill="white">GrowthForge 360</text>
   <!-- Workspace -->
   <rect x="70" y="225" width="220" height="40" rx="4" fill="#e2e8f0"/>
   <text x="180" y="245" font-family="system-ui" font-size="10" fill="#64748b" text-anchor="middle">WORKSPACE — Team Performance Hub</text>

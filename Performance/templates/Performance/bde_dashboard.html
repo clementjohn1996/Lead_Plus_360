@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% load humanize %}{% block title %}BDE performance · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% load humanize %}{% block title %}BDE performance · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">PERFORMANCE</span><h1>BDE performance &amp; targets</h1><p>{{ month|date:"F Y" }} · slabs of {{ cfg.slabs }}: Red 1-{{ cfg.red_max }}, Yellow {{ cfg.red_max|add:1 }}-{{ cfg.yellow_max }}, Green {{ cfg.yellow_max|add:1 }}-{{ cfg.slabs }}. Facts for management review, not automatic decisions.</p></div>
 <div class="row-gap"><a class="ghost-btn" href="{% url 'bde_calendar' %}">Calendar</a><a class="ghost-btn" href="{% url 'bde_appraisals' %}">Appraisals</a>{% if is_hr %}<a class="ghost-btn" href="{% url 'pip_list' %}">PIP list</a><a class="ghost-btn" href="{% url 'bde_config' %}">Settings &amp; targets</a><a class="ghost-btn" href="{% url 'bde_audit' %}">Audit log</a>{% endif %}<a class="ghost-btn" href="{% url 'bde_export' %}">Export CSV</a>

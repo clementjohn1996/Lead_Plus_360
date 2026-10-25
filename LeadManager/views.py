@@ -136,7 +136,7 @@ def lead_create(request):
         lead.save()
         form.save_m2m()
         Activity.objects.create(lead=lead, activity_type="status", subject="Lead created",
-                                body="Lead added to LeadPlus-360.", created_by=request.user)
+                                body="Lead added to GrowthForge 360.", created_by=request.user)
         messages.success(request, "Lead created successfully.")
         return redirect("lead_detail", lead_id=lead.id)
     return render(request, "leads/lead_form.html", {"form": form, "groups": _groups(form), "title": "Add Lead"})
@@ -289,7 +289,7 @@ def export_leads(request):
         qs = qs.filter(Q(name__icontains=q) | Q(company__icontains=q) | Q(email__icontains=q) | Q(phone__icontains=q))
     wb = Workbook()
     ws = wb.active
-    ws.title = "LeadPlus-360 Leads"
+    ws.title = "GrowthForge 360 Leads"
     ws.append(["ID", "Name", "Company", "Email", "Phone", "Website", "Country", "City", "Source", "Services", "Stage",
                "Temperature", "Priority", "Owner", "Estimated Value", "Probability %", "Next Follow-up",
                "Last Contacted", "Tags", "Notes"])

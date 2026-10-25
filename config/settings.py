@@ -12,6 +12,8 @@ def env_list(name, default=""):
     return [v.strip() for v in os.environ.get(name, default).split(",") if v.strip()]
 
 
+PRODUCT_NAME = "GrowthForge 360"
+
 DEBUG = env_bool("DJANGO_DEBUG", True)
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
     "Performance.apps.PerformanceConfig",
     "Delivery.apps.DeliveryConfig",
     "Accounts.apps.AccountsConfig",
+    "Outreach.apps.OutreachConfig",
 ]
 
 MIDDLEWARE = [
@@ -105,7 +108,14 @@ LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
 
 EMAIL_BACKEND = os.environ.get("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", "hr@leadplus360.local")
+DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", "hello@growthforge360.local")
+EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_TLS", "1") == "1"
+# Public base URL used in outreach unsubscribe links (set to your real domain in production).
+SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
 
 # Attendance: face recognition + geo-fencing
 FACE_COSINE_THRESHOLD = float(os.environ.get("FACE_COSINE_THRESHOLD", "0.40"))

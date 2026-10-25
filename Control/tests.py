@@ -118,16 +118,21 @@ class HierarchyTests(TestCase):
 
 
 class CustomRoleAndWorkflowTests(TestCase):
-    def test_department_can_be_created_from_roles_page(self):
+    def test_department_can_be_created_from_departments_page(self):
         admin = make_user("department-admin", role="super_admin")
         self.client.force_login(admin)
-        response = self.client.post(reverse("roles"), {
+        response = self.client.post(reverse("hr_departments"), {
             "name": "Customer Success", "description": "Customer relationships.",
         })
-        self.assertRedirects(response, reverse("roles"))
+        self.assertRedirects(response, reverse("hr_departments"))
         from LeadManager.models import Department
         department = Department.objects.get(name="Customer Success")
         self.assertEqual(department.description, "Customer relationships.")
+
+    def test_roles_page_no_longer_hosts_departments(self):
+        self.client.force_login(make_user("roles-admin", role="super_admin"))
+        html = self.client.get(reverse("roles")).content.decode()
+        self.assertNotIn("Add department", html)
 
     def test_designation_uses_the_role_options(self):
         from HR.forms import NewEmployeeForm

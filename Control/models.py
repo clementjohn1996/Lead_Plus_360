@@ -32,6 +32,10 @@ class Role(models.Model):
     can_manage_accounts = models.BooleanField(
         "Accounts access", default=False, help_text="Customers, invoices, payments, expenses and reports."
     )
+    can_use_outreach = models.BooleanField(
+        "Can use Outreach", default=False,
+        help_text="Prospecting, website signals, campaigns and the email approval desk.",
+    )
     is_privileged = models.BooleanField(
         "Privileged", default=False, help_text="Only a Super Admin may assign this role."
     )
@@ -94,7 +98,7 @@ class UserProfile(models.Model):
 class OrganizationSettings(models.Model):
     """Singleton company identity and billing defaults shown across the workspace."""
 
-    name = models.CharField(max_length=160, default="LeadPlus-360")
+    name = models.CharField(max_length=160, default="GrowthForge 360")
     tagline = models.CharField(max_length=200, blank=True)
     logo = models.ImageField(upload_to="organization/", blank=True, null=True)
     primary_color = models.CharField(max_length=7, default="#6d4aff")

@@ -135,30 +135,15 @@ def profile(request):
 
 @login_required
 def guide(request):
-    return render(request, "Control/guide.html")
+    from .navigation import guide_audience
+
+    return render(request, "Control/guide.html", {"aud": guide_audience(request.user)})
 
 
 @admin_required
 def roles(request):
-    from LeadManager.models import Department
-
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        description = request.POST.get("description", "").strip()
-        if not name:
-            messages.error(request, "Department name is required.")
-        elif Department.objects.filter(name__iexact=name).exists():
-            messages.error(request, "That department already exists.")
-        else:
-            Department.objects.create(name=name, description=description)
-            messages.success(request, f"{name} department created.")
-            return redirect("roles")
-
     rows = Role.objects.annotate(user_count=Count("users")).order_by("level", "label")
-    return render(request, "Control/roles.html", {
-        "roles": rows,
-        "departments": Department.objects.all(),
-    })
+    return render(request, "Control/roles.html", {"roles": rows})
 
 
 @admin_required

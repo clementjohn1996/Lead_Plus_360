@@ -6,7 +6,7 @@
   <!-- Login card -->
   <rect x="250" y="160" width="300" height="200" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
   <text x="400" y="200" font-family="system-ui" font-size="16" font-weight="600" fill="#1e293b" text-anchor="middle">Welcome back</text>
-  <text x="400" y="220" font-family="system-ui" font-size="12" fill="#64748b" text-anchor="middle">Sign in to LeadPlus-360</text>
+  <text x="400" y="220" font-family="system-ui" font-size="12" fill="#64748b" text-anchor="middle">Sign in to GrowthForge 360</text>
   <!-- Username field -->
   <rect x="280" y="245" width="240" height="40" rx="6" fill="white" stroke="#cbd5e1"/>
   <text x="290" y="272" font-family="system-ui" font-size="13" fill="#64748b">username</text>

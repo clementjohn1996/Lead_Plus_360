@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}Monthly attendance · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}Monthly attendance · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">HR</span><h1>Monthly attendance</h1><p>{{ month_label }} · {{ workdays }} working days.</p></div>
 <form class="inline-form"><select name="month" class="form-select">{% for m in months %}<option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ m }}</option>{% endfor %}</select>

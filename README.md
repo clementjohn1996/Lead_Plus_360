@@ -1,4 +1,28 @@
-# LeadPlus-360
+# GrowthForge 360
+
+One platform for the whole growth loop: **find prospects → warm them up → run the CRM pipeline → deliver → invoice → manage the team.**
+GrowthForge 360 merges *Lead Plus 360* (CRM, HR, attendance, performance, delivery, accounts) with the prospecting and outreach ideas from *Harvey* (website signals, cohorts, approval-gated email sequences).
+
+## What is new in this version
+* **Growth engine** (new module): Excel/CSV lead import with duplicate checks, website signal scan and fit score, cohort builder, three-email campaigns written from each prospect's strongest signal, an approval desk (nothing is sent without a person approving), daily cap, kill switch, unsubscribe link, reply logging and one-click conversion to a CRM lead.
+* One standard, role-aware sidebar on every page. People only see modules their role can open.
+* "Add lead" is no longer in every header. It appears on the Leads, Pipeline, CRM overview and Home shortcuts.
+* The User guide is generated for the signed-in user's role.
+* Departments have their own page (moved out of Roles & access) with titled fields.
+* KPIs can apply to several departments.
+* Onboarding: education (4 steps) and experience (3 steps) documents are separate; employees can skip; freshers skip experience automatically; documents are verified by an HR Recruiter and confirmed by the HR Manager.
+* Employee photos: on add/edit, as the icon in lists, on the profile and on the onboarding board.
+
+## Growth engine setup
+1. `python manage.py migrate`
+2. Sign in as admin, open **Growth engine → Signals & settings**, tick the signals you approve, set your sender name, company address and daily cap.
+3. Real email: set `DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend`, `DJANGO_EMAIL_HOST`, `DJANGO_EMAIL_USER`, `DJANGO_EMAIL_PASSWORD`, `DJANGO_DEFAULT_FROM_EMAIL` and `SITE_URL` (your public address, used in unsubscribe links). Without these, emails print to the console.
+4. Schedule `python manage.py send_outreach` every 15 minutes (Task Scheduler / cron) so approved follow-ups go out on time.
+5. Optional: `python manage.py scan_prospects --limit 30` scans new prospects in bulk.
+
+---
+
+# GrowthForge 360
 
 Internal operations platform for an IT services company (software & web app development, digital marketing, SEO, ad video production).
 
@@ -83,7 +107,7 @@ python manage.py calculate_bde_performance
 ```
 
 
-## LeadPlus-360 Delivery Workflow (v1.2)
+## GrowthForge 360 Delivery Workflow (v1.2)
 
 The delivery workflow now tracks accountability beyond BDE performance:
 
@@ -133,7 +157,7 @@ python manage.py bootstrap_admin --username clement --password YourStrongPasswor
 
 ## Work Calendar & Delivery Planning
 
-LeadPlus-360 now includes a delivery work calendar under `/delivery/calendar/`. When a BDE converts a lead to **Won**, the lead editor routes the BDE directly into delivery planning.
+GrowthForge 360 now includes a delivery work calendar under `/delivery/calendar/`. When a BDE converts a lead to **Won**, the lead editor routes the BDE directly into delivery planning.
 
 ### Workflow
 1. **BDE converts lead → Won** → delivery plan screen opens automatically.

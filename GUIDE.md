@@ -1,4 +1,6 @@
-﻿# LeadPlus-360 Guide
+> This is the original Lead Plus 360 guide. The in-app User guide is now role-specific and is the up-to-date version.
+
+﻿# GrowthForge 360 Guide
 
 Internal system for our IT company (software/web development, digital marketing, SEO, ad-video production). It combines CRM, HR onboarding, face-recognition attendance with geofencing, and employee performance scoring with a TV display. The same content is available in-app at `/guide/`.
 
@@ -40,7 +42,7 @@ Roles & access; Onboarding workflows (role, then department, then default match;
 Use **Delivery Workflow** to follow a client/project from commercial acquisition to production:
 
 1. BDE wins the lead.
-2. LeadPlus-360 creates a delivery work item for each mapped service.
+2. GrowthForge 360 creates a delivery work item for each mapped service.
 3. BDM accepts the work and routes it to a Project Manager.
 4. Project Manager creates individual execution assignments.
 5. Developers / Digital Marketing / Graphic Design / Video team members accept and update their own work.

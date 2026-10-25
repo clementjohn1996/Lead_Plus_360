@@ -1,10 +1,12 @@
-{% extends "leadplus_base.html" %}{% block title %}Control center · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}Control center · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">SUPER ADMIN</span><h1>Control center</h1><p>Manage users, roles, office locations and workflows from one place.</p></div>
 <div class="row-gap"><a class="primary-btn" href="{% url 'hr_employee_create' %}">＋ Add user</a><a class="ghost-btn" href="{% url 'attendance_offices' %}">＋ Add office location</a></div></div>
 <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px">
 <a class="card" href="{% url 'attendance_offices' %}"><h3>Office locations</h3><p>{{ offices }} configured &middot; add, edit, set radius</p></a>
 <a class="card" href="{% url 'roles' %}"><h3>Roles &amp; access</h3><p>{{ role_count }} roles &middot; create and edit</p></a>
+<a class="card" href="{% url 'hr_departments' %}"><h3>Departments</h3><p>Teams, heads and structure</p></a>
+<a class="card" href="{% url 'outreach_settings' %}"><h3>Growth engine</h3><p>Signals, daily cap, sender identity</p></a>
 <a class="card" href="{% url 'hr_workflows' %}"><h3>Onboarding workflows</h3><p>Steps and approvals</p></a>
 <a class="card" href="{% url 'hr_employees' %}"><h3>Employees</h3><p>Profiles, manager, shift</p></a>
 <a class="card" href="{% url 'performance_kpis' %}"><h3>KPI setup</h3><p>What is measured</p></a>

@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}{{ lead.name }} · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}{{ lead.name }} · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div class="lead-heading"><span class="avatar xl">{{lead.name|first|upper}}</span><div><span class="eyebrow">LEAD #{{lead.id}}</span><h1>{{lead.name}}</h1><p>{{lead.company|default:"Independent prospect"}} · {{lead.city|default:""}}{% if lead.country %}, {{lead.country}}{% endif %}</p></div></div><div class="head-actions"><a class="ghost-btn" href="{% url 'leads' %}">← Leads</a><a class="primary-btn" href="{% url 'lead_edit' lead.id %}">Edit lead</a>{% if lead.stage == "won" %}<a class="ghost-btn" href="{% url 'delivery_calendar_plan_create' lead.id %}">📅 Plan delivery</a>{% endif %}</div></div>
 <div class="detail-grid">

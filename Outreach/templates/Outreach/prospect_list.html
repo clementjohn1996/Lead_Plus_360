@@ -1,0 +1,14 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Prospects · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>Prospects</h1><p>Companies you may reach out to. Scan their websites to find out why they fit.</p></div>
+<div class="head-actions"><a class="ghost-btn" href="{% url 'outreach_export' %}">⤓ Export CSV</a><a class="ghost-btn" href="{% url 'outreach_import' %}">⇪ Import</a><a class="primary-btn" href="{% url 'outreach_prospect_new' %}">＋ Add prospect</a></div></div>
+<form method="get" class="card filters"><input class="filter-search" name="q" value="{{ q }}" placeholder="Search company, contact, email or city"><select class="form-select" name="status"><option value="">All statuses</option>{% for k, l in statuses %}<option value="{{ k }}" {% if k == status %}selected{% endif %}>{{ l }}</option>{% endfor %}</select><button class="ghost-btn">Filter</button></form>
+<form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="scan">
+<div class="card-head"><div><h2>{{ page.paginator.count }} prospect{{ page.paginator.count|pluralize }}</h2><p>Tick up to {{ batch }} and scan their websites.</p></div><button class="primary-btn">Scan selected</button></div>
+<div class="table-wrap"><table class="leads-table"><thead><tr><th></th><th>Company</th><th>Contact</th><th>Score</th><th>Signals</th><th>Status</th></tr></thead><tbody>
+{% for p in page %}<tr><td><input type="checkbox" name="ids" value="{{ p.pk }}"></td><td><a class="lead-name" href="{% url 'outreach_prospect_detail' p.pk %}"><span>{{ p.company }}<small>{{ p.city|default:p.website }}</small></span></a></td><td>{{ p.contact_name|default:"—" }}<br><small>{{ p.email }}</small></td><td>{% if p.score is not None %}<strong>{{ p.score }}</strong>/10{% else %}—{% endif %}</td><td>{{ p.signals|length }}</td><td><span class="pill">{{ p.get_status_display }}</span></td></tr>
+{% empty %}<tr><td colspan="6"><div class="empty big">No prospects yet. <a class="text-link" href="{% url 'outreach_import' %}">Import an Excel file</a> or add one by hand.</div></td></tr>{% endfor %}
+</tbody></table></div></form>
+{% if page.has_other_pages %}<div class="row-gap">{% if page.has_previous %}<a class="ghost-btn" href="?page={{ page.previous_page_number }}&q={{ q }}&status={{ status }}">← Previous</a>{% endif %}<span class="muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="ghost-btn" href="?page={{ page.next_page_number }}&q={{ q }}&status={{ status }}">Next →</a>{% endif %}</div>{% endif %}
+{% endblock %}

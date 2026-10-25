@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}Improvement plan · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}Improvement plan · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">IMPROVEMENT PLAN · {{ plan.get_status_display|upper }}</span><h1>{{ plan.employee.full_name }}</h1><p>{{ plan.start_date|date:"d M Y" }} → review {{ plan.review_date|date:"d M Y" }}{% if plan.is_overdue %} <span class="pill lost">Overdue</span>{% endif %}</p></div>
 <div class="row-gap">{% if is_hr %}<a class="ghost-btn" href="{% url 'pip_list' %}">Back</a>{% endif %}<a class="ghost-btn" href="{% url 'bde_profile' plan.employee.pk %}">BDE profile</a><a class="ghost-btn" href="{% url 'performance_employee' plan.employee.pk %}">Performance</a></div></div>

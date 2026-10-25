@@ -3,12 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, F, Count
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from Control.permissions import admin_required, hr_required, is_hr
 
 from . import services
-from .forms import CustomTaskForm, DocumentForm, EmployeeForm, NewEmployeeForm
+from .forms import CustomTaskForm, DepartmentForm, DocumentForm, EmployeeForm, NewEmployeeForm, PhotoForm
 from .forms import WorkflowForm, WorkflowTaskFormSet
 from .models import Employee, OnboardingTask, OnboardingTemplate
 
@@ -21,26 +22,22 @@ def _can_view(user, employee):
 
 
 @admin_required
-def department_list(request):
+def department_list(request, pk=None):
     from LeadManager.models import Department
-    departments = Department.objects.prefetch_related("services").select_related("head")
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        description = request.POST.get("description", "").strip()
-        if not name:
-            messages.error(request, "Department name is required.")
-        elif Department.objects.filter(name__iexact=name).exists():
-            messages.error(request, "That department already exists.")
-        else:
-            Department.objects.create(name=name, description=description)
-            messages.success(request, f"{name} department created.")
-            return redirect("hr_departments")
-    return render(request, "HR/departments.html", {"departments": departments})
+
+    instance = get_object_or_404(Department, pk=pk) if pk else None
+    form = DepartmentForm(request.POST or None, instance=instance)
+    if request.method == "POST" and form.is_valid():
+        saved = form.save()
+        messages.success(request, f"{saved.name} department {'updated' if instance else 'created'}.")
+        return redirect("hr_departments")
+    departments = Department.objects.select_related("head").annotate(employee_total=Count("employees"))
+    return render(request, "HR/departments.html", {"departments": departments, "form": form, "editing": instance})
 
 
 @hr_required
 def employee_list(request):
-    qs = Employee.objects.select_related("user", "department", "manager__user")
+    qs = Employee.objects.select_related("user__profile", "department", "manager__user")
     q = request.GET.get("q", "").strip()
     status = request.GET.get("status", "")
     department = request.GET.get("department", "")
@@ -64,14 +61,15 @@ def employee_list(request):
 @hr_required
 def employee_create(request):
     if request.method == "POST":
-        form = NewEmployeeForm(request.POST, actor=request.user)
+        form = NewEmployeeForm(request.POST, request.FILES, actor=request.user)
         if form.is_valid():
             data = form.cleaned_data
             role = data["role"]
             fields = {k: v for k, v in data.items() if k in form._meta.fields}
             employee, password = services.create_employee(
                 username=data["username"], first_name=data["first_name"], last_name=data["last_name"],
-                email=data["email"], role_name=role.name if role else "developer", **fields,
+                email=data["email"], role_name=role.name if role else "developer",
+                photo=data.get("photo"), **fields,
             )
             return render(request, "HR/employee_created.html", {"employee": employee, "password": password})
     else:
@@ -81,7 +79,7 @@ def employee_create(request):
 
 @login_required
 def employee_detail(request, pk):
-    employee = get_object_or_404(Employee.objects.select_related("user", "department", "manager__user"), pk=pk)
+    employee = get_object_or_404(Employee.objects.select_related("user__profile", "department", "manager__user"), pk=pk)
     if not _can_view(request.user, employee):
         raise PermissionDenied
     from Attendance.models import AttendanceRecord, FaceTemplate
@@ -104,7 +102,7 @@ def employee_detail(request, pk):
 def employee_edit(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == "POST":
-        form = EmployeeForm(request.POST, instance=employee, actor=request.user)
+        form = EmployeeForm(request.POST, request.FILES, instance=employee, actor=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Employee updated.")
@@ -160,8 +158,9 @@ def employee_regenerate_checklist(request, pk):
 
 @hr_required
 def onboarding_board(request):
-    employees = Employee.objects.filter(status="onboarding").select_related("user", "department")
+    employees = Employee.objects.filter(status="onboarding").select_related("user__profile", "department")
     rows = [{"emp": e, "progress": e.onboarding_progress(),
+             "review": e.onboarding_tasks.filter(status__in=["submitted", "verified"]).count(),
              "overdue": sum(1 for t in e.onboarding_tasks.filter(status="pending") if t.is_overdue)}
             for e in employees]
     return render(request, "HR/onboarding_board.html", {"rows": rows})
@@ -180,35 +179,60 @@ def my_onboarding(request):
 
 
 def _with_approval(task, user):
-    task.user_can_approve = task.status == "submitted" and task.can_approve(user)
+    """Annotate a task with what `user` may do to it (drives the buttons on the profile page)."""
+    stage = task.review_stage
+    task.user_can_verify = stage == "verify" and task.can_verify(user)
+    task.user_can_approve = (
+        (stage == "approve" and task.can_approve(user))
+        or (stage == "verify" and not task.verifier and task.can_approve(user))
+    )
+    task.user_can_reject = task.can_review_now(user)
     return task
 
 
 @login_required
 @require_POST
 def task_update(request, task_id):
-    task = get_object_or_404(OnboardingTask.objects.select_related("employee__manager"), pk=task_id)
+    task = get_object_or_404(OnboardingTask.objects.select_related("employee__manager", "employee__user"), pk=task_id)
     user = request.user
     hr = is_hr(user)
     own = getattr(user, "employee", None)
     is_owner = bool(own and own.pk == task.employee_id and task.responsible == "employee")
-    approver = task.can_approve(user)
-    if not (hr or is_owner or approver):
+    reviewer = task.can_review_now(user)
+    if not (hr or is_owner or reviewer):
         raise PermissionDenied
     action = request.POST.get("action", "done")
-    if action in ("approve", "reject"):
-        if task.status != "submitted" or not approver:
+    if action == "verify":
+        if task.review_stage != "verify" or not task.can_verify(user):
             raise PermissionDenied
-        if action == "approve":
-            task.approved_by = user
-            task.save(update_fields=["approved_by"])
-            task.mark_done(task.completed_by or user)
-            messages.success(request, "Task approved.")
+        outcome = task.verify(user)
+        messages.success(request, "Verified. Waiting for confirmation." if outcome == "verified" else "Verified and completed.")
+    elif action == "approve":
+        if not task.review_stage or not reviewer:
+            raise PermissionDenied
+        task.approved_by = user
+        if not task.verified_by_id:
+            task.verified_by = user
+            task.verified_at = timezone.now()
+            task.save(update_fields=["approved_by", "verified_by", "verified_at"])
         else:
-            task.status = "pending"
-            task.completed_at = None
-            task.save(update_fields=["status", "completed_at"])
-            messages.info(request, "Task sent back for rework.")
+            task.save(update_fields=["approved_by"])
+        task.mark_done(task.completed_by or user)
+        messages.success(request, "Task confirmed.")
+    elif action == "reject":
+        if not task.review_stage or not reviewer:
+            raise PermissionDenied
+        task.status = "pending"
+        task.completed_at = None
+        task.verified_by = None
+        task.verified_at = None
+        task.save(update_fields=["status", "completed_at", "verified_by", "verified_at"])
+        messages.info(request, "Task sent back for rework.")
+    elif action == "skip_self":
+        if not (is_owner and task.skippable and task.status == "pending"):
+            raise PermissionDenied
+        task.mark_skipped(user)
+        messages.success(request, "Step skipped.")
     elif task.auto_key and not hr:
         messages.info(request, "This task completes automatically.")
     elif action == "done" and (hr or is_owner):
@@ -222,30 +246,53 @@ def task_update(request, task_id):
             if task.requires_upload and not task.attachment:
                 messages.error(request, "Please attach the required file first.")
             elif task.status != "pending":
-                messages.info(request, "This task is already finished or awaiting approval.")
+                messages.info(request, "This task is already finished or awaiting review.")
             elif task.complete(user) == "submitted":
                 if is_owner and not hr:
                     task.submission_count = F("submission_count") + 1
                     task.save(update_fields=["submission_count"])
-                messages.success(request, "Submitted for approval.")
+                messages.success(request, "Submitted for verification." if task.verifier else "Submitted for approval.")
             else:
                 if is_owner and not hr:
                     task.submission_count = F("submission_count") + 1
                     task.save(update_fields=["submission_count"])
                 messages.success(request, "Task completed.")
-    elif action == "skip" and hr and not task.required:
-        task.status = "skipped"
-        task.save(update_fields=["status"])
+    elif action == "skip" and hr and (not task.required or task.skippable):
+        task.mark_skipped(user)
     elif action == "reopen" and hr:
         task.status = "pending"
         task.completed_at = None
         task.completed_by = None
         task.approved_by = None
+        task.verified_by = None
+        task.verified_at = None
         task.submission_count = 0
-        task.save(update_fields=["status", "completed_at", "completed_by", "approved_by", "submission_count"])
-    if is_owner and not hr and not approver:
+        task.save(update_fields=["status", "completed_at", "completed_by", "approved_by",
+                                 "verified_by", "verified_at", "submission_count"])
+    services.refresh_status(task.employee)
+    if is_owner and not hr and not reviewer:
         return redirect("my_onboarding")
     return redirect("hr_employee_detail", pk=task.employee_id)
+
+
+@hr_required
+@require_POST
+def employee_photo(request, pk):
+    """Quick photo upload from the employee list / onboarding board / profile."""
+    employee = get_object_or_404(Employee.objects.select_related("user"), pk=pk)
+    photo = request.FILES.get("photo")
+    form = PhotoForm(request.POST, request.FILES)
+    if photo and form.is_valid():
+        services.save_photo(employee.user, form.cleaned_data["photo"])
+        messages.success(request, f"Photo updated for {employee.full_name}.")
+    else:
+        messages.error(request, "Choose a valid image file (JPG or PNG).")
+    target = request.POST.get("next", "")
+    from django.utils.http import url_has_allowed_host_and_scheme
+
+    if target and url_has_allowed_host_and_scheme(target, {request.get_host()}, request.is_secure()):
+        return redirect(target)
+    return redirect("hr_employee_detail", pk=employee.pk)
 
 
 @admin_required

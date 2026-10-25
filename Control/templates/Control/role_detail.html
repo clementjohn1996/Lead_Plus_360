@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}{{ role.label }} · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}{{ role.label }} · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">ROLE · LEVEL {{ role.level }}</span><h1>{{ role.label }}</h1><p>{{ role.description|default:"No description." }}</p></div>
 <div class="row-gap"><a class="ghost-btn" href="{% url 'roles' %}">Back</a><a class="primary-btn" href="{% url 'role_edit' role.pk %}">Edit</a></div></div>
