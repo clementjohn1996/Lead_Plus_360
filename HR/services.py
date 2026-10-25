@@ -39,8 +39,10 @@ def generate_onboarding(employee):
     template = pick_template(employee)
     if not template:
         return 0
-    tasks = [
-        OnboardingTask(
+    tasks = []
+    for t in template.tasks.all():
+        skip = bool(employee.is_fresher and t.skip_if_fresher)
+        tasks.append(OnboardingTask(
             employee=employee,
             title=t.title,
             description=t.description,
@@ -51,14 +53,37 @@ def generate_onboarding(employee):
             requires_upload=t.requires_upload,
             requires_approval=t.requires_approval,
             approver=t.approver,
+            verifier=t.verifier,
+            skippable=t.skippable,
+            skip_label=t.skip_label,
+            skip_if_fresher=t.skip_if_fresher,
             auto_key=t.auto_key,
             order=t.order,
-        )
-        for t in template.tasks.all()
-    ]
+            status="skipped" if skip else "pending",
+        ))
     OnboardingTask.objects.bulk_create(tasks)
     sync_auto_tasks(employee)
     return len(tasks)
+
+
+def apply_fresher_flag(employee):
+    """Skip pending experience steps once an employee is marked as a fresher."""
+    if not employee.is_fresher:
+        return 0
+    count = 0
+    for task in employee.onboarding_tasks.filter(skip_if_fresher=True, status="pending"):
+        task.mark_skipped()
+        count += 1
+    return count
+
+
+def save_photo(user, photo):
+    """Store an employee photo on the user's profile (shown in lists, profile and onboarding board)."""
+    if not photo:
+        return
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.profile_picture = photo
+    profile.save(update_fields=["profile_picture"])
 
 
 def sync_auto_tasks(employee):
@@ -74,7 +99,9 @@ def refresh_status(employee):
     """Move an onboarding employee to active once every required task is finished."""
     if employee.status != "onboarding":
         return False
-    pending = employee.onboarding_tasks.filter(required=True, status__in=["pending", "submitted"]).exists()
+    pending = employee.onboarding_tasks.filter(
+        required=True, status__in=["pending", "submitted", "verified"]
+    ).exists()
     if employee.onboarding_tasks.exists() and not pending:
         employee.status = "active"
         employee.save(update_fields=["status"])
@@ -83,7 +110,7 @@ def refresh_status(employee):
 
 
 @transaction.atomic
-def create_employee(*, username, first_name, last_name, email, role_name="developer", password=None, **fields):
+def create_employee(*, username, first_name, last_name, email, role_name="developer", password=None, photo=None, **fields):
     """Create login + role + employee record + onboarding checklist. Returns (employee, password)."""
     password = password or generate_password()
     user = User.objects.create_user(
@@ -100,6 +127,8 @@ def create_employee(*, username, first_name, last_name, email, role_name="develo
     profile.save(update_fields=["role"])
     # UserProfile may have been cached by the User post_save signal before the
     # role was assigned. Clear that stale reverse relation on the returned user.
+    user._state.fields_cache.pop("profile", None)
+    save_photo(user, photo)
     user._state.fields_cache.pop("profile", None)
     employee = Employee.objects.create(user=user, **fields)
     generate_onboarding(employee)

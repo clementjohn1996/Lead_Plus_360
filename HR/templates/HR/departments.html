@@ -1,13 +1,15 @@
 {% extends "leadplus_base.html" %}
-{% block title %}Departments · LeadPlus-360{% endblock %}
+{% block title %}Departments · {{ product_name }}{% endblock %}
 {% block content %}
-<div class="page-head"><div><span class="eyebrow">PEOPLE & ORGANIZATION</span><h1>Departments</h1><p>Set the company structure used for employee assignment and delivery routing.</p></div></div>
+<div class="page-head"><div><span class="eyebrow">ADMINISTRATION</span><h1>Departments</h1><p>The company structure used for employee assignment, KPIs, onboarding workflows and delivery routing.</p></div></div>
 <div class="grid-2-1">
-<section class="card"><div class="card-head"><div><h2>Company departments</h2><p>These departments appear when HR creates or edits an employee.</p></div></div>
-<div class="table-wrap"><table><thead><tr><th>Department</th><th>Head</th><th>Employees</th><th>Purpose</th></tr></thead><tbody>
-{% for d in departments %}<tr><td><strong>{{ d.name }}</strong></td><td>{{ d.head.get_full_name|default:d.head.username|default:"Not assigned" }}</td><td>{{ d.employees.count }}</td><td>{{ d.description|default:"—" }}</td></tr>{% empty %}<tr><td colspan="4"><div class="empty">No departments configured.</div></td></tr>{% endfor %}
+<section class="card"><div class="card-head"><div><h2>Company departments</h2><p>These appear when HR creates or edits an employee and when you scope a KPI.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>Department</th><th>Head</th><th>Employees</th><th>Purpose</th><th></th></tr></thead><tbody>
+{% for d in departments %}<tr><td><strong>{{ d.name }}</strong></td><td>{% if d.head %}{{ d.head.get_full_name|default:d.head.username }}{% else %}Not assigned{% endif %}</td><td>{{ d.employee_total }}</td><td>{{ d.description|default:"—"|truncatechars:60 }}</td><td><a class="ghost-btn" href="{% url 'hr_department_edit' d.pk %}">Edit</a></td></tr>{% empty %}<tr><td colspan="5"><div class="empty">No departments configured.</div></td></tr>{% endfor %}
 </tbody></table></div></section>
-<section class="card"><div class="card-head"><div><h2>Add department</h2><p>Use this for new teams or business units.</p></div></div>
-<form method="post" class="lead-form">{% csrf_token %}<div class="field"><label>Department name</label><input class="form-control" name="name" required placeholder="e.g. Customer Success"></div><div class="field"><label>Description</label><textarea class="form-control" name="description" rows="4" placeholder="What does this department handle?"></textarea></div><button class="primary-btn">Create department</button></form></section>
+<section class="card"><div class="card-head"><div><h2>{% if editing %}Edit department{% else %}Add a department{% endif %}</h2><p>{% if editing %}Changing the name updates it everywhere it is used.{% else %}Use this for new teams or business units.{% endif %}</p></div>{% if editing %}<a class="ghost-btn" href="{% url 'hr_departments' %}">New instead</a>{% endif %}</div>
+<form method="post" class="lead-form">{% csrf_token %}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}
+<button class="primary-btn">{% if editing %}Save department{% else %}Create department{% endif %}</button></form></section>
 </div>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}Appraisal · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}Appraisal · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">APPRAISAL · {{ a.get_decision_display|upper }}</span><h1>{{ a.employee.full_name }}</h1><p>{{ a.period_start|date:"M Y" }} - {{ a.period_end|date:"M Y" }}</p></div><a class="ghost-btn" href="{% url 'bde_profile' a.employee.pk %}">BDE profile</a></div>
 <div class="two-col">

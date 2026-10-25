@@ -1,0 +1,16 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Cohort builder · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>Cohort builder</h1><p>Pick who to reach by what is true about their business. The count updates when you apply.</p></div>
+<a class="primary-btn" href="{% url 'outreach_campaign_new' %}?{{ query }}">Create campaign from this cohort</a></div>
+<form method="get" class="card lead-form"><div class="form-grid">
+<div class="field"><label>Must have these signals</label><div class="check-grid"><div>{% for k, l in signal_choices %}<label><input type="checkbox" name="must" value="{{ k }}" {% if k in filters.must %}checked{% endif %}> {{ l }}</label>{% endfor %}</div></div></div>
+<div class="field"><label>Leave out companies with</label><div class="check-grid"><div>{% for k, l in signal_choices %}<label><input type="checkbox" name="exclude" value="{{ k }}" {% if k in filters.exclude %}checked{% endif %}> {{ l }}</label>{% endfor %}</div></div></div>
+<div class="field"><label for="ms">Minimum fit score (0-10)</label><input id="ms" class="form-control" type="number" min="0" max="10" name="min_score" value="{{ filters.min_score }}"></div>
+<div class="field"><label for="ct">City contains</label><input id="ct" class="form-control" name="city" value="{{ filters.city }}"></div>
+<div class="field"><label for="st">Status</label><select id="st" class="form-select" name="status"><option value="">Any</option>{% for k, l in statuses %}<option value="{{ k }}" {% if k == filters.status %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+<div class="field"><label><input type="checkbox" name="with_email" value="1" {% if filters.with_email %}checked{% endif %}> Only prospects with a usable email</label></div></div>
+<button class="primary-btn">Apply</button></form>
+<section class="card"><div class="card-head"><div><h2>{{ count }} matching prospect{{ count|pluralize }}</h2><p>Showing the first 25.</p></div></div><div class="table-wrap"><table><thead><tr><th>Company</th><th>Score</th><th>Email</th></tr></thead><tbody>
+{% for p in rows %}<tr><td><a class="text-link" href="{% url 'outreach_prospect_detail' p.pk %}">{{ p.company }}</a></td><td>{{ p.score|default_if_none:"—" }}</td><td>{{ p.email|default:"—" }}</td></tr>{% empty %}<tr><td colspan="3"><div class="empty">No prospects match.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

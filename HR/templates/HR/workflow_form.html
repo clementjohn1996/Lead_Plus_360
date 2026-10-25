@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}{% if workflow %}{{ workflow.name }}{% else %}New workflow{% endif %} · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}{% if workflow %}{{ workflow.name }}{% else %}New workflow{% endif %} · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">ADMIN</span><h1>{% if workflow %}{{ workflow.name }}{% else %}New workflow{% endif %}</h1><p>Define the steps, who does them, and which ones need approval. Blank step rows are ignored; tick Delete to remove a step.</p></div><a class="ghost-btn" href="{% url 'hr_workflows' %}">Back</a></div>
 <form method="post" class="lead-form">{% csrf_token %}

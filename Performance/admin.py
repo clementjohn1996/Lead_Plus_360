@@ -17,8 +17,9 @@ from .models import (
 
 @admin.register(KPI)
 class KPIAdmin(admin.ModelAdmin):
-    list_display = ("name", "department", "auto_key", "weight", "default_target", "is_active")
-    list_filter = ("department", "is_active")
+    list_display = ("name", "department_names", "auto_key", "weight", "default_target", "is_active")
+    list_filter = ("departments", "is_active")
+    filter_horizontal = ("departments",)
     search_fields = ("name", "description")
 
 

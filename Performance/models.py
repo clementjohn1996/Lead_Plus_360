@@ -27,9 +27,9 @@ class KPI(models.Model):
 
     name = models.CharField(max_length=120)
     description = models.CharField(max_length=255, blank=True)
-    department = models.ForeignKey(
-        "LeadManager.Department", on_delete=models.CASCADE, null=True, blank=True, related_name="kpis",
-        help_text="Leave empty to apply to every department.",
+    departments = models.ManyToManyField(
+        "LeadManager.Department", blank=True, related_name="applicable_kpis",
+        help_text="Tick every department this KPI applies to. Leave all unticked to apply it to every department.",
     )
     auto_key = models.CharField(
         max_length=30, blank=True, choices=[("", "Manual entry")] + AUTO_KEYS,
@@ -44,6 +44,11 @@ class KPI(models.Model):
     class Meta:
         ordering = ["name"]
         verbose_name = "KPI"
+
+    @property
+    def department_names(self):
+        names = [d.name for d in self.departments.all()]
+        return ", ".join(names) if names else "All departments"
 
     def __str__(self):
         return self.name

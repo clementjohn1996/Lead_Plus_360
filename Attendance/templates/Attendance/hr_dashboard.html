@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}Attendance today · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}Attendance today · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">HR</span><h1>Attendance · {{ day|date:"D, d M Y" }}</h1><p>Who is in, who is late, and any failed punch attempts.</p></div>
 <form class="inline-form"><input type="date" name="date" value="{{ day|date:'Y-m-d' }}" class="form-control" onchange="this.form.submit()"><a class="ghost-btn" href="{% url 'attendance_monthly' %}">Monthly report</a></form></div>

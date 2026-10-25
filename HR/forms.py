@@ -46,12 +46,16 @@ class NewEmployeeForm(Styled, forms.ModelForm):
     username = forms.CharField(max_length=150, help_text="Login name")
     role = forms.ModelChoiceField(queryset=Role.objects.none(), required=True)
     designation = forms.ChoiceField(required=False, label="Designation")
+    photo = forms.ImageField(
+        required=False, label="Photo", help_text="Shown as the employee icon in lists, the profile and the onboarding board.",
+        widget=forms.ClearableFileInput(attrs={"accept": "image/*"}),
+    )
 
     class Meta:
         model = Employee
         fields = [
             "department", "designation", "manager", "employment_type", "work_mode",
-            "date_of_joining", "personal_email", "emergency_contact",
+            "date_of_joining", "is_fresher", "personal_email", "emergency_contact",
             "shift_start", "shift_end", "grace_minutes", "show_on_tv",
         ]
         widgets = {"date_of_joining": DateInput(), "shift_start": TimeInput(), "shift_end": TimeInput()}
@@ -78,12 +82,16 @@ class EmployeeForm(Styled, forms.ModelForm):
     email = forms.EmailField(label="Work email")
     role = forms.ModelChoiceField(queryset=Role.objects.none(), required=True)
     designation = forms.ChoiceField(required=False, label="Designation")
+    photo = forms.ImageField(
+        required=False, label="Photo", help_text="Shown as the employee icon in lists, the profile and the onboarding board.",
+        widget=forms.ClearableFileInput(attrs={"accept": "image/*"}),
+    )
 
     class Meta:
         model = Employee
         fields = [
             "department", "designation", "manager", "employment_type", "work_mode", "status",
-            "date_of_joining", "date_of_birth", "date_of_exit", "personal_email", "emergency_contact",
+            "date_of_joining", "is_fresher", "date_of_birth", "date_of_exit", "personal_email", "emergency_contact",
             "shift_start", "shift_end", "grace_minutes", "show_on_tv",
         ]
         widgets = {
@@ -122,6 +130,10 @@ class EmployeeForm(Styled, forms.ModelForm):
         profile.save(update_fields=["role"])
         user.is_active = employee.status != "exited"
         user.save(update_fields=["is_active"])
+        from . import services
+
+        services.save_photo(user, self.cleaned_data.get("photo"))
+        services.apply_fresher_flag(employee)
         return employee
 
 
@@ -182,7 +194,8 @@ class WorkflowTaskForm(Styled, forms.ModelForm):
     class Meta:
         model = OnboardingTemplateTask
         fields = ["title", "category", "responsible", "due_after_days", "required", "requires_upload",
-                  "requires_approval", "approver", "auto_key", "description", "order"]
+                  "verifier", "requires_approval", "approver", "skippable", "skip_label", "skip_if_fresher",
+                  "auto_key", "description", "order"]
         widgets = {"description": forms.TextInput(attrs={"placeholder": "Instructions (optional)"})}
 
     def __init__(self, *args, **kwargs):
@@ -193,3 +206,31 @@ class WorkflowTaskForm(Styled, forms.ModelForm):
 WorkflowTaskFormSet = forms.inlineformset_factory(
     OnboardingTemplate, OnboardingTemplateTask, form=WorkflowTaskForm, extra=3, can_delete=True,
 )
+
+
+class DepartmentForm(Styled, forms.ModelForm):
+    """Create / edit a department. Lives on Administration -> Departments."""
+
+    class Meta:
+        from LeadManager.models import Department as _Department
+
+        model = _Department
+        fields = ["name", "description", "head"]
+        labels = {
+            "name": "Department name",
+            "description": "What does this department handle?",
+            "head": "Department head",
+        }
+        widgets = {"description": forms.Textarea(attrs={"rows": 3})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["head"].queryset = User.objects.filter(is_active=True).order_by("first_name", "username")
+        self.fields["head"].required = False
+        self.fields["head"].label_from_instance = lambda u: u.get_full_name() or u.username
+        self.fields["name"].widget.attrs["placeholder"] = "e.g. Customer Success"
+        self._style()
+
+
+class PhotoForm(forms.Form):
+    photo = forms.ImageField()

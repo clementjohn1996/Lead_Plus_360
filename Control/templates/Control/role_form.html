@@ -1,4 +1,4 @@
-{% extends "leadplus_base.html" %}{% block title %}{% if role %}Edit role{% else %}New role{% endif %} · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% block title %}{% if role %}Edit role{% else %}New role{% endif %} · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">ADMIN</span><h1>{% if role %}Edit {{ role.label }}{% else %}New role{% endif %}</h1><p>Tick what people in this role are allowed to do. Super Admin includes everything.</p></div><a class="ghost-btn" href="{% url 'roles' %}">Cancel</a></div>
 <form method="post" class="lead-form">{% csrf_token %}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}

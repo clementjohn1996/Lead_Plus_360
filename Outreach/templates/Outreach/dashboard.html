@@ -1,0 +1,23 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Growth overview · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>Growth overview</h1><p>Find the right companies, see why they fit, and reach out with a person approving every email.</p></div>
+<div class="head-actions"><a class="ghost-btn" href="{% url 'outreach_import' %}">⇪ Import Excel/CSV</a><a class="primary-btn" href="{% url 'outreach_prospect_new' %}">＋ Add prospect</a></div></div>
+{% if no_signals_confirmed %}<div class="card" style="border-left:4px solid #f0a23a"><strong>One-time setup:</strong> choose which website signals the system may look for under <a class="text-link" href="{% url 'outreach_settings' %}">Signals &amp; settings</a>. Scanning stays off until you do.</div>{% endif %}
+{% if paused %}<div class="card" style="border-left:4px solid #e5484d"><strong>Sending is paused.</strong> No email will leave until you resume it in settings.</div>{% endif %}
+<div class="metric-grid">
+<div class="metric"><span>Prospects</span><strong>{{ total }}</strong><small>{{ unscanned }} not scanned yet</small></div>
+<div class="metric"><span>Awaiting your approval</span><strong>{{ awaiting }}</strong><small><a class="text-link" href="{% url 'outreach_outbox' %}">Open approval desk</a></small></div>
+<div class="metric"><span>Sent today</span><strong>{{ sent_today }} / {{ cap }}</strong><small>{{ approved }} approved, waiting to send</small></div>
+<div class="metric"><span>Replies</span><strong>{{ replies }}</strong><small>{{ reply_rate }}% of {{ sent }} sent · {{ converted }} became leads</small></div>
+</div>
+<div class="grid-2-1">
+<section class="card"><div class="card-head"><div><h2>Prospect funnel</h2><p>Where your prospects are today.</p></div></div>
+<div class="table-wrap"><table><tbody>{% for label, n in funnel %}<tr><td>{{ label }}</td><td style="text-align:right"><strong>{{ n }}</strong></td></tr>{% endfor %}</tbody></table></div></section>
+<section class="card"><div class="card-head"><div><h2>Most common signals</h2><p>What your prospects have in common.</p></div></div>
+{% for label, n in top_signals %}<div class="check-item"><div class="body"><b>{{ label }}</b></div><span class="pill none">{{ n }}</span></div>{% empty %}<div class="empty">Scan some websites to see signals here.</div>{% endfor %}</section>
+</div>
+<section class="card"><div class="card-head"><div><h2>Campaigns</h2></div><a class="ghost-btn" href="{% url 'outreach_campaign_new' %}">＋ New campaign</a></div>
+<div class="table-wrap"><table><thead><tr><th>Campaign</th><th>Status</th><th>Drafts</th><th>Sent</th></tr></thead><tbody>
+{% for c in campaigns %}<tr><td><a class="text-link" href="{% url 'outreach_campaign_detail' c.pk %}">{{ c.name }}</a></td><td><span class="pill">{{ c.get_status_display }}</span></td><td>{{ c.drafts }}</td><td>{{ c.sent_total }}</td></tr>{% empty %}<tr><td colspan="4"><div class="empty">No campaigns yet. Build a cohort first.</div></td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

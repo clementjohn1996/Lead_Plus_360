@@ -1,0 +1,1 @@
+<span class="avatar {{ size|default:'sm' }}{% if e.photo_url %} photo{% endif %}">{% if e.photo_url %}<img src="{{ e.photo_url }}" alt="{{ e.full_name }}" loading="lazy">{% else %}{{ e.initial }}{% endif %}</span>

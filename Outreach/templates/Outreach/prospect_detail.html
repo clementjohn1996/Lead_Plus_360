@@ -1,0 +1,27 @@
+{% extends "leadplus_base.html" %}
+{% block title %}{{ p.company }} · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PROSPECT</span><h1>{{ p.company }}</h1><p>{{ p.contact_name }}{% if p.contact_title %} · {{ p.contact_title }}{% endif %} <span class="pill">{{ p.get_status_display }}</span>{% if p.unsubscribed %} <span class="pill lost">Do not contact</span>{% endif %}</p></div>
+<div class="head-actions">{% if p.whatsapp_url %}<a class="ghost-btn" href="{{ p.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
+<form method="post">{% csrf_token %}<button class="ghost-btn" name="action" value="scan">Scan website</button>{% if not p.converted_lead and not p.unsubscribed %}<button class="primary-btn" name="action" value="convert">Convert to CRM lead</button>{% endif %}</form>
+{% if p.converted_lead %}<a class="primary-btn" href="{% url 'lead_detail' p.converted_lead.pk %}">Open CRM lead</a>{% endif %}</div></div>
+<div class="grid-2-1">
+<div>
+<section class="card"><div class="card-head"><div><h2>Why this prospect</h2><p>{% if p.score is not None %}Fit score <strong>{{ p.score }}/10</strong>. {{ p.score_reason }}{% else %}Not scanned yet.{% endif %}</p></div></div>
+{% for key, label in signal_rows %}<div class="check-item"><span class="box">✓</span><div class="body"><b>{{ label }}</b></div></div>{% empty %}<div class="empty">No confirmed signals found.</div>{% endfor %}
+{% if tech %}<p class="muted">Website platform: {{ tech|join:", " }}</p>{% endif %}{% if p.last_scanned %}<p class="muted">Last scanned {{ p.last_scanned|date:"d M Y H:i" }}</p>{% endif %}</section>
+<section class="card"><div class="card-head"><div><h2>Log a reply</h2><p>Paste what they wrote. The system works out the intent and stops queued emails.</p></div></div>
+<form method="post" class="lead-form">{% csrf_token %}<input type="hidden" name="action" value="reply"><textarea class="form-control" name="reply_text" rows="3" required></textarea><button class="primary-btn">Log reply</button></form></section>
+<section class="card"><div class="card-head"><div><h2>Emails</h2></div></div><div class="table-wrap"><table><tbody>{% for m in messages_list %}<tr><td>Step {{ m.step }}</td><td>{{ m.subject }}</td><td><span class="pill">{{ m.get_status_display }}</span></td></tr>{% empty %}<tr><td><div class="empty">No emails drafted.</div></td></tr>{% endfor %}</tbody></table></div></section>
+<section class="card"><div class="card-head"><div><h2>Timeline</h2></div></div>
+<form method="post" class="row-gap">{% csrf_token %}<input type="hidden" name="action" value="note"><input class="form-control" name="note_text" placeholder="Add a note"><button class="ghost-btn">Add</button></form>
+{% for e in events %}<div class="check-item"><div class="body"><b>{{ e.get_kind_display }}{% if e.intent %} · {{ e.intent }}{% endif %}</b><br><small>{{ e.created_at|date:"d M H:i" }}{% if e.created_by %} · {{ e.created_by.get_full_name|default:e.created_by.username }}{% endif %}</small><br>{{ e.body|linebreaksbr }}</div></div>{% empty %}<div class="empty">Nothing yet.</div>{% endfor %}</section>
+</div>
+<div>
+<section class="card"><div class="card-head"><div><h2>Details</h2></div></div>
+<form method="post" class="lead-form">{% csrf_token %}<input type="hidden" name="action" value="save">{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</div>{% endfor %}<button class="ghost-btn">Save changes</button></form></section>
+<section class="card"><div class="card-head"><div><h2>Email address</h2><p>Currently: {{ p.get_email_status_display }}</p></div></div>
+<form method="post" class="row-gap">{% csrf_token %}<input type="hidden" name="action" value="email_status"><select class="form-select" name="email_status">{% for k, l in p.EMAIL_STATUSES %}<option value="{{ k }}" {% if k == p.email_status %}selected{% endif %}>{{ l }}</option>{% endfor %}</select><button class="ghost-btn">Update</button></form></section>
+{% if not p.unsubscribed %}<section class="card"><form method="post" class="row-gap">{% csrf_token %}<button class="ghost-btn" name="action" value="disqualify">Not a fit</button><button class="ghost-btn" name="action" value="unsubscribe" onclick="return confirm('Mark as do-not-contact and cancel queued emails?')">Do not contact</button></form></section>{% endif %}
+</div></div>
+{% endblock %}

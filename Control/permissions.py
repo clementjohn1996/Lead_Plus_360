@@ -53,6 +53,14 @@ def sees_team_leads(user):
     return has_flag(user, "sees_team_leads")
 
 
+def can_use_outreach(user):
+    return has_flag(user, "can_use_outreach")
+
+
+def has_employee(user):
+    return bool(getattr(user, "is_authenticated", False) and getattr(user, "employee", None))
+
+
 def can_manage_accounts(user):
     return has_flag(user, "can_manage_accounts")
 

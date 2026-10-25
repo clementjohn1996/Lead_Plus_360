@@ -1,9 +1,10 @@
-{% extends "leadplus_base.html" %}{% load static %}{% block title %}User guide · LeadPlus-360{% endblock %}
+{% extends "leadplus_base.html" %}{% load static %}{% block title %}User guide · {{ product_name }}{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
     <span class="eyebrow">HELP</span>
-    <h1>LeadPlus-360 User Guide</h1>
+    <h1>{{ product_name }} User Guide</h1>
+    <p>Written for your role: <strong>{{ nav.role_label }}</strong>. You only see the chapters for modules you can open.</p>
   </div>
   <button class="toc-toggle" aria-label="Table of contents" aria-expanded="false" aria-controls="guide-toc-list">
     <span class="toc-toggle-icon">☰</span>
@@ -19,20 +20,24 @@
       <button class="toc-close" aria-label="Close table of contents">✕</button>
     </div>
     <div id="guide-toc-list" class="toc-list">
-      <ol>
+      <ol class="guide-toc-ol">
         <li><a href="#overview">Overview</a></li>
-        <li><a href="#roles">Roles & Permissions</a></li>
+{% if 'hr' in aud or 'admin' in aud or 'manager' in aud %}        <li><a href="#roles">Roles &amp; Permissions</a></li>{% endif %}
         <li><a href="#getting-started">Getting Started</a></li>
-        <li><a href="#attendance">Attendance (Face + Geo)</a></li>
-        <li><a href="#crm">CRM — Leads & Pipeline</a></li>
-        <li><a href="#tasks">Follow-ups & Tasks</a></li>
-        <li><a href="#performance">Performance & KPIs</a></li>
-        <li><a href="#bde">BDE Targets & Appraisals</a></li>
-        <li><a href="#hr">HR — Employees & Onboarding</a></li>
-        <li><a href="#tv">TV Displays (Live Leaderboard)</a></li>
-        <li><a href="#admin">Super Admin — Configuration</a></li>
-        <li><a href="#first-day">Typical First-Day Setup</a></li>
-        <li><a href="#faq">FAQ & Troubleshooting</a></li>
+        <li><a href="#everyone">Profile, photo &amp; onboarding</a></li>
+{% if 'employee' in aud or 'hr' in aud %}        <li><a href="#attendance">Attendance (Face + Geo)</a></li>{% endif %}
+{% if 'outreach' in aud %}        <li><a href="#growth">Growth engine (prospecting &amp; outreach)</a></li>{% endif %}
+{% if 'crm' in aud %}        <li><a href="#crm">CRM — Leads &amp; Pipeline</a></li>
+        <li><a href="#tasks">Follow-ups &amp; Tasks</a></li>{% endif %}
+{% if 'delivery' in aud %}        <li><a href="#delivery">Delivery &amp; work calendar</a></li>{% endif %}
+{% if 'accounts' in aud %}        <li><a href="#accounts">Accounts &amp; invoices</a></li>{% endif %}
+{% if 'employee' in aud or 'manager' in aud or 'hr' in aud %}        <li><a href="#performance">Performance &amp; KPIs</a></li>{% endif %}
+{% if 'bde_team' in aud or 'crm' in aud %}        <li><a href="#bde">BDE Targets &amp; Appraisals</a></li>{% endif %}
+{% if 'hr' in aud %}        <li><a href="#hr">HR — Employees &amp; Onboarding</a></li>
+        <li><a href="#tv">TV Displays (Live Leaderboard)</a></li>{% endif %}
+{% if 'admin' in aud %}        <li><a href="#admin">Super Admin — Configuration</a></li>
+        <li><a href="#first-day">Typical First-Day Setup</a></li>{% endif %}
+        <li><a href="#faq">FAQ &amp; Troubleshooting</a></li>
       </ol>
     </div>
   </nav>
@@ -40,8 +45,10 @@
   <div class="guide-content">
 
 <section id="overview" class="card">
-  <div class="card-head"><div><h2>1. Overview</h2></div></div>
-  <p>LeadPlus-360 is the internal operating system for our IT company (software & web development, digital marketing, SEO, ad-video production). It unifies four domains:</p>
+  <div class="card-head"><div><h2>Overview</h2></div>
+  <p><strong>Your access:</strong> these are the modules your role can open. Anything not listed here is intentionally hidden from your menu.</p>
+  <div class="guide-access">{% for group in nav_groups %}{% if group.title %}<span class="pill won">{{ group.title }}</span>{% endif %}{% endfor %}</div></div>
+  <p>GrowthForge 360 is the internal operating system for our IT company (software & web development, digital marketing, SEO, ad-video production). It unifies four domains:</p>
   <div class="grid-4">
     <article class="feature"><i>■</i><h4>CRM</h4><p>Leads, pipeline, activities, follow-ups, quick-lead capture, exports.</p></article>
     <article class="feature"><i>☺</i><h4>HR</h4><p>Employee directory, onboarding workflows, documents, task checklists.</p></article>
@@ -50,12 +57,13 @@
   </div>
   <figure class="guide-img">
     <img src="{% static 'guide/dashboard-overview.svg' %}" alt="Dashboard overview showing four modules" />
-    <figcaption>Fig 1 — Main dashboard with role-aware widgets</figcaption>
+    <figcaption>Main dashboard with role-aware widgets</figcaption>
   </figure>
 </section>
 
+{% if 'hr' in aud or 'admin' in aud or 'manager' in aud %}
 <section id="roles" class="card">
-  <div class="card-head"><div><h2>2. Roles & Permissions</h2></div></div>
+  <div class="card-head"><div><h2>Roles & Permissions</h2></div></div>
   <p>Menus and data visibility are driven by <strong>Role</strong> (assigned in <em>Control Center → Users</em>). The hierarchy:</p>
   <table class="role-table">
     <thead><tr><th>Role</th><th>Level</th><th>CRM</th><th>Lead scope</th><th>Team mgmt</th><th>HR access</th><th>Super Admin</th></tr></thead>
@@ -72,14 +80,15 @@
   </table>
   <figure class="guide-img">
     <img src="{% static 'guide/roles-table.svg' %}" alt="Roles table in admin panel" />
-    <figcaption>Fig 2 — Roles & access screen (Super Admin only)</figcaption>
+    <figcaption>Roles & access screen (Super Admin only)</figcaption>
   </figure>
   <p><strong>Capabilities</strong> are toggled per role: <code>can_use_crm</code>, <code>sees_all_leads</code>, <code>sees_team_leads</code>, <code>can_manage_team</code>, <code>can_manage_hr</code>, <code>is_super_admin</code>. Only Super Admin may assign <em>privileged</em> roles.</p>
 </section>
+{% endif %}
 
 <section id="getting-started" class="card">
-  <div class="card-head"><div><h2>3. Getting Started</h2></div></div>
-  <h3>3.1 First login</h3>
+  <div class="card-head"><div><h2>Getting Started</h2></div></div>
+  <h3>First login</h3>
   <ol>
     <li>Open <code>/login/</code> — use credentials provided by your admin.</li>
     <li>On first visit you land on <strong>Home</strong> — widgets appear based on your role.</li>
@@ -87,24 +96,28 @@
   </ol>
   <figure class="guide-img">
     <img src="{% static 'guide/login.svg' %}" alt="Login page" />
-    <figcaption>Fig 3 — Login screen</figcaption>
+    <figcaption>Login screen</figcaption>
   </figure>
   <figure class="guide-img">
     <img src="{% static 'guide/profile.svg' %}" alt="Profile page with password change" />
-    <figcaption>Fig 4 — Profile & password change</figcaption>
+    <figcaption>Profile & password change</figcaption>
   </figure>
 
-  <h3>3.2 Sidebar navigation</h3>
+{% if 'everyone' in aud %}
+  <h3>Sidebar navigation</h3>
   <p>The left sidebar shows only sections your role permits. Collapse on mobile with the <kbd>☰</kbd> button.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/sidebar.svg' %}" alt="Sidebar navigation" />
-    <figcaption>Fig 5 — Role-aware sidebar</figcaption>
+    <figcaption>Role-aware sidebar</figcaption>
   </figure>
+{% endif %}
 </section>
 
+{% if 'employee' in aud or 'hr' in aud %}
 <section id="attendance" class="card">
-  <div class="card-head"><div><h2>4. Attendance (Face + Geo)</h2></div></div>
-  <h3>4.1 Face enrolment (one-time)</h3>
+  <div class="card-head"><div><h2>Attendance (Face + Geo)</h2></div></div>
+{% if 'employee' in aud %}
+  <h3>Face enrolment (one-time)</h3>
   <ol>
     <li>Open <strong>Attendance</strong> from sidebar.</li>
     <li>Click <strong>Enrol face</strong> — allow camera permission.</li>
@@ -113,10 +126,12 @@
   </ol>
   <figure class="guide-img">
     <img src="{% static 'guide/attendance-enrol.svg' %}" alt="Face enrolment screen" />
-    <figcaption>Fig 6 — Face enrolment (15-frame capture)</figcaption>
+    <figcaption>Face enrolment (15-frame capture)</figcaption>
   </figure>
 
-  <h3>4.2 Punch in / out</h3>
+{% endif %}
+{% if 'employee' in aud %}
+  <h3>Punch in / out</h3>
   <ol>
     <li>Open Attendance page.</li>
     <li>Click <strong>Punch in</strong> (morning) or <strong>Punch out</strong> (evening).</li>
@@ -126,10 +141,12 @@
   <p><strong>Status badges:</strong> <span class="badge present">Present</span> <span class="badge late">Late</span> <span class="badge outside">Outside radius</span> <span class="badge missed">Missed</span></p>
   <figure class="guide-img">
     <img src="{% static 'guide/attendance-punch.svg' %}" alt="Punch in/out screen" />
-    <figcaption>Fig 7 — Punch screen with live camera preview</figcaption>
+    <figcaption>Punch screen with live camera preview</figcaption>
   </figure>
 
-  <h3>4.3 HR: Attendance today & Monthly report</h3>
+{% endif %}
+{% if 'hr' in aud %}
+  <h3>HR: Attendance today & Monthly report</h3>
   <ul>
     <li><strong>Attendance today</strong> — live list of present/late/absent with filter by department.</li>
     <li><strong>Monthly report</strong> — calendar grid, export CSV, filter by employee/date range.</li>
@@ -137,53 +154,60 @@
   </ul>
   <figure class="guide-img">
     <img src="{% static 'guide/attendance-monthly.svg' %}" alt="Monthly attendance report" />
-    <figcaption>Fig 8 — Monthly report with export</figcaption>
+    <figcaption>Monthly report with export</figcaption>
   </figure>
 
-  <h3>4.4 Office locations (geo-fencing)</h3>
+{% endif %}
+{% if 'hr' in aud %}
+  <h3>Office locations (geo-fencing)</h3>
   <p>HR/Admin define offices: name, address, <strong>latitude</strong>, <strong>longitude</strong>, <strong>radius (metres)</strong>. Punches outside radius are flagged <em>Outside radius</em>.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/office-locations.svg' %}" alt="Office locations management" />
-    <figcaption>Fig 9 — Office geofence configuration</figcaption>
+    <figcaption>Office geofence configuration</figcaption>
   </figure>
+{% endif %}
 </section>
+{% endif %}
 
+{% if 'crm' in aud %}
 <section id="crm" class="card">
-  <div class="card-head"><div><h2>5. CRM — Leads & Pipeline</h2></div></div>
-  <h3>5.1 Lead list</h3>
+  <div class="card-head"><div><h2>CRM — Leads & Pipeline</h2></div></div>
+  <h3>Lead list</h3>
   <p>Filters: stage, source, assigned, date range, search by name/company/email/phone. Columns: name, company, stage, value, next follow-up, owner.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/lead-list.svg' %}" alt="Lead list with filters" />
-    <figcaption>Fig 10 — Lead list with stage filter</figcaption>
+    <figcaption>Lead list with stage filter</figcaption>
   </figure>
 
-  <h3>5.2 Create / edit lead</h3>
+  <h3>Create / edit lead</h3>
   <p>Fields: name, company, email, phone, source, stage, value, assigned to, tags, notes. <strong>Quick lead</strong> (⚡) captures minimal fields for speed.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/lead-form.svg' %}" alt="Lead create/edit form" />
-    <figcaption>Fig 11 — Lead form (full & quick)</figcaption>
+    <figcaption>Lead form (full & quick)</figcaption>
   </figure>
 
-  <h3>5.3 Pipeline view</h3>
+  <h3>Pipeline view</h3>
   <p>Kanban columns: New → Contacted → Qualified → Proposal → Negotiation → Won / Lost. Drag & drop to change stage; inline activity log on card click.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/pipeline.svg' %}" alt="Pipeline kanban board" />
-    <figcaption>Fig 12 — Pipeline kanban with drag-drop</figcaption>
+    <figcaption>Pipeline kanban with drag-drop</figcaption>
   </figure>
 
-  <h3>5.4 Activities & follow-ups</h3>
+  <h3>Activities & follow-ups</h3>
   <p>Log call, meeting, email, WhatsApp, note. Set <strong>Next follow-up date</strong> — appears in <em>Follow-ups</em> list and on Home dashboard.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/activities.svg' %}" alt="Activity log on lead detail" />
-    <figcaption>Fig 13 — Activity timeline with follow-up scheduling</figcaption>
+    <figcaption>Activity timeline with follow-up scheduling</figcaption>
   </figure>
 
-  <h3>5.5 Export leads</h3>
+  <h3>Export leads</h3>
   <p>CSV export respects current filters and user's lead scope.</p>
 </section>
+{% endif %}
 
+{% if 'crm' in aud %}
 <section id="tasks" class="card">
-  <div class="card-head"><div><h2>6. Follow-ups & Tasks</h2></div></div>
+  <div class="card-head"><div><h2>Follow-ups & Tasks</h2></div></div>
   <ul>
     <li><strong>Follow-ups</strong> — auto-generated from lead next-follow-up dates. Mark complete, reschedule, or convert to task.</li>
     <li><strong>Tasks</strong> — standalone to-dos assignable to any CRM user. Status: To-do / In progress / Done.</li>
@@ -191,67 +215,87 @@
   </ul>
   <figure class="guide-img">
     <img src="{% static 'guide/tasks.svg' %}" alt="Tasks and follow-ups list" />
-    <figcaption>Fig 14 — Tasks & follow-ups unified view</figcaption>
+    <figcaption>Tasks & follow-ups unified view</figcaption>
   </figure>
 </section>
+{% endif %}
 
+{% if 'employee' in aud or 'manager' in aud or 'hr' in aud %}
 <section id="performance" class="card">
-  <div class="card-head"><div><h2>7. Performance & KPIs</h2></div></div>
-  <h3>7.1 Leaderboard</h3>
+  <div class="card-head"><div><h2>Performance & KPIs</h2></div></div>
+{% if 'manager' in aud %}
+  <h3>Leaderboard</h3>
   <p>Monthly score = Σ (KPI value × weight). Shown for current month; filter by role/department. Top 3 appear on manager Home.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/leaderboard.svg' %}" alt="Performance leaderboard" />
-    <figcaption>Fig 15 — Monthly leaderboard</figcaption>
+    <figcaption>Monthly leaderboard</figcaption>
   </figure>
 
-  <h3>7.2 My performance</h3>
+{% endif %}
+{% if 'employee' in aud %}
+  <h3>My performance</h3>
   <p>Shows your score, rank, each KPI with actual vs target, trend sparkline.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/my-performance.svg' %}" alt="My performance detail" />
-    <figcaption>Fig 16 — Individual performance breakdown</figcaption>
+    <figcaption>Individual performance breakdown</figcaption>
   </figure>
 
-  <h3>7.3 KPI setup (Admin/HR)</h3>
+{% endif %}
+{% if 'hr' in aud %}
+  <h3>KPI setup (Admin/HR)</h3>
   <p>Define KPIs per role: name, unit, target, weight, formula (manual entry or auto from CRM/attendance). Weights must sum to 100.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/kpi-setup.svg' %}" alt="KPI configuration" />
-    <figcaption>Fig 17 — KPI setup per role</figcaption>
+    <figcaption>KPI setup per role</figcaption>
   </figure>
+{% endif %}
 </section>
+{% endif %}
 
+{% if 'bde_team' in aud or 'crm' in aud %}
 <section id="bde" class="card">
-  <div class="card-head"><div><h2>8. BDE Targets & Appraisals</h2></div></div>
-  <h3>8.1 BDE dashboard</h3>
+  <div class="card-head"><div><h2>BDE Targets & Appraisals</h2></div></div>
+{% if 'bde_team' in aud %}
+  <h3>BDE dashboard</h3>
   <p>Business Development Executive targets: monthly revenue, leads created, conversion rate, activities. Progress bars update in real time.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/bde-dashboard.svg' %}" alt="BDE targets dashboard" />
-    <figcaption>Fig 18 — BDE targets with progress rings</figcaption>
+    <figcaption>BDE targets with progress rings</figcaption>
   </figure>
 
-  <h3>8.2 Calendar view</h3>
+{% endif %}
+{% if 'bde_team' in aud %}
+  <h3>Calendar view</h3>
   <p>Heatmap of daily activity counts; click a day to see logs.</p>
 
-  <h3>8.3 Appraisals</h3>
+{% endif %}
+{% if 'bde_team' in aud %}
+  <h3>Appraisals</h3>
   <p>Quarterly/annual review cycles: self-assessment → manager review → HR finalise. PDF export for records.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/appraisals.svg' %}" alt="Appraisal cycle" />
-    <figcaption>Fig 19 — Appraisal workflow</figcaption>
+    <figcaption>Appraisal workflow</figcaption>
   </figure>
 
-  <h3>8.4 Improvement plans (PIP)</h3>
+{% endif %}
+{% if 'bde_team' in aud %}
+  <h3>Improvement plans (PIP)</h3>
   <p>Create structured plan with milestones, check-in dates, owner. Track status: Active / Completed / Closed.</p>
+{% endif %}
 </section>
+{% endif %}
 
+{% if 'hr' in aud %}
 <section id="hr" class="card">
-  <div class="card-head"><div><h2>9. HR — Employees & Onboarding</h2></div></div>
-  <h3>9.1 Employee directory</h3>
+  <div class="card-head"><div><h2>HR — Employees & Onboarding</h2></div></div>
+  <h3>Employee directory</h3>
   <p>List with filters: status, department, role. Click for detail: profile, documents, onboarding checklist, performance history.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/employee-list.svg' %}" alt="Employee directory" />
-    <figcaption>Fig 20 — Employee directory with filters</figcaption>
+    <figcaption>Employee directory with filters</figcaption>
   </figure>
 
-  <h3>9.2 Add employee (creates login + onboarding)</h3>
+  <h3>Add employee (creates login + onboarding)</h3>
   <ol>
     <li><strong>Employees → New</strong> — fill personal, professional, role, department, manager.</li>
     <li>System creates Django user, sends welcome email with temp password.</li>
@@ -259,29 +303,31 @@
   </ol>
   <figure class="guide-img">
     <img src="{% static 'guide/employee-create.svg' %}" alt="Add employee form" />
-    <figcaption>Fig 21 — New employee form (auto-generates onboarding)</figcaption>
+    <figcaption>New employee form (auto-generates onboarding)</figcaption>
   </figure>
 
-  <h3>9.3 Onboarding board</h3>
+  <h3>Onboarding board</h3>
   <p>Kanban: Pending → In progress → Submitted → Approved. HR/manager approve steps marked <em>needs approval</em>.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/onboarding-board.svg' %}" alt="Onboarding kanban board" />
-    <figcaption>Fig 22 — Onboarding progress board</figcaption>
+    <figcaption>Onboarding progress board</figcaption>
   </figure>
 
-  <h3>9.4 Workflows (templates)</h3>
+  <h3>Workflows (templates)</h3>
   <p>Define checklist templates per role/department. Steps: title, description, assignee (self/HR/manager), approval required, order. Matching priority: role → department → default.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/workflows.svg' %}" alt="Workflow templates" />
-    <figcaption>Fig 23 — Onboarding workflow builder</figcaption>
+    <figcaption>Onboarding workflow builder</figcaption>
   </figure>
 
-  <h3>9.5 Documents</h3>
+  <h3>Documents</h3>
   <p>Upload contracts, ID proofs, offer letters per employee. Categories: contract, id, certificate, other.</p>
 </section>
+{% endif %}
 
+{% if 'hr' in aud %}
 <section id="tv" class="card">
-  <div class="card-head"><div><h2>10. TV Displays (Live Leaderboard)</h2></div></div>
+  <div class="card-head"><div><h2>TV Displays (Live Leaderboard)</h2></div></div>
   <ol>
     <li>Super Admin → <strong>TV displays → New</strong>.</li>
     <li>Name it (e.g. "Main floor TV"), choose rotation interval (default 10s).</li>
@@ -292,41 +338,45 @@
   <p><strong>Security:</strong> Anyone with the link can view — keep it on internal network only.</p>
   <figure class="guide-img">
     <img src="{% static 'guide/tv-manage.svg' %}" alt="TV display management" />
-    <figcaption>Fig 24 — Create TV display token</figcaption>
+    <figcaption>Create TV display token</figcaption>
   </figure>
   <figure class="guide-img">
     <img src="{% static 'guide/tv-display.svg' %}" alt="TV display live view" />
-    <figcaption>Fig 25 — Live TV leaderboard rotating</figcaption>
+    <figcaption>Live TV leaderboard rotating</figcaption>
   </figure>
 </section>
+{% endif %}
 
+{% if 'admin' in aud %}
 <section id="admin" class="card">
-  <div class="card-head"><div><h2>11. Super Admin — Configuration</h2></div></div>
-  <h3>11.1 Control Center</h3>
+  <div class="card-head"><div><h2>Super Admin — Configuration</h2></div></div>
+  <h3>Control Center</h3>
   <p>Overview: user count, active roles, offices, quick actions (toggle active, set role, reset password).</p>
   <figure class="guide-img">
     <img src="{% static 'guide/control-center.svg' %}" alt="Control center" />
-    <figcaption>Fig 26 — Control Center dashboard</figcaption>
+    <figcaption>Control Center dashboard</figcaption>
   </figure>
 
-  <h3>11.2 Roles & access</h3>
+  <h3>Roles & access</h3>
   <p>Create/edit roles, set capabilities, level (seniority), privileged flag. Assign permissions from Django auth.</p>
 
-  <h3>11.3 Onboarding workflows</h3>
+  <h3>Onboarding workflows</h3>
   <p>Build reusable checklists. See §9.4.</p>
 
-  <h3>11.4 KPI setup</h3>
+  <h3>KPI setup</h3>
   <p>Define measurable KPIs per role with weights. See §7.3.</p>
 
-  <h3>11.5 TV displays</h3>
+  <h3>TV displays</h3>
   <p>Manage tokens, rotation speed, which roles/departments to show. See §10.</p>
 
-  <h3>11.6 Django admin</h3>
+  <h3>Django admin</h3>
   <p>Raw data access at <code>/admin/</code> — use sparingly.</p>
 </section>
+{% endif %}
 
+{% if 'admin' in aud %}
 <section id="first-day" class="card">
-  <div class="card-head"><div><h2>12. Typical First-Day Setup (Super Admin)</h2></div></div>
+  <div class="card-head"><div><h2>Typical First-Day Setup (Super Admin)</h2></div></div>
   <ol>
     <li><strong>Office locations</strong> — add lat/lng/radius for each office (Attendance → Office locations).</li>
     <li><strong>Review roles</strong> — verify capabilities match org chart (Control Center → Roles).</li>
@@ -338,12 +388,69 @@
   </ol>
   <figure class="guide-img">
     <img src="{% static 'guide/setup-checklist.svg' %}" alt="First-day setup checklist" />
-    <figcaption>Fig 27 — Setup checklist</figcaption>
+    <figcaption>Setup checklist</figcaption>
   </figure>
 </section>
+{% endif %}
+
+<section id="everyone" class="card">
+  <div class="card-head"><div><h2>Profile, photo &amp; onboarding</h2></div></div>
+  <h3>Your profile and photo</h3>
+  <p>Open your name at the bottom of the sidebar to change your details, password and <strong>profile photo</strong>. Your photo is used as your icon in the employee list, on your profile and on the onboarding board.</p>
+  {% if 'hr' in aud %}<p>HR can also add or change anyone's photo while adding or editing an employee, or with the <em>Add photo</em> button on the Employees page, the profile and the Onboarding board.</p>{% endif %}
+  {% if 'employee' in aud %}
+  <h3>My onboarding checklist</h3>
+  <p>Open <strong>My onboarding</strong> and finish each step. Document steps need a file upload.</p>
+  <ul>
+    <li><strong>Education certificates</strong> are four separate steps: High school, Higher secondary, Graduation and Post-graduation. If one does not apply to you, press <em>Skip</em>.</li>
+    <li><strong>Experience letters</strong> are three separate steps: Latest employer, Previous employer I and Previous employer II. Freshers press <em>I'm a fresher - skip</em> (HR may also mark you as a fresher and these are skipped for you).</li>
+    <li>Every document you submit is <strong>verified by an HR Recruiter</strong> and then <strong>confirmed by the HR Manager</strong>. The step shows who it is waiting for. If it is sent back, upload again after HR resets your submission.</li>
+  </ul>
+  {% endif %}
+</section>
+
+{% if 'outreach' in aud %}
+<section id="growth" class="card">
+  <div class="card-head"><div><h2>Growth engine (prospecting &amp; outreach)</h2></div></div>
+  <p>The Growth engine finds and warms up prospects <em>before</em> they become CRM leads. Nothing is ever emailed without a person approving it.</p>
+  <h3>Add prospects</h3>
+  <p><strong>Import leads (Excel/CSV)</strong> reads an .xlsx or .csv file, recognises common column names (company, contact, email, phone, website, city), shows a preview and skips duplicates of existing prospects and CRM leads. You can also add one prospect by hand from <em>Prospects</em>.</p>
+  <h3>Scan a website for signals</h3>
+  <p>On a prospect (or with <em>Scan selected</em> on the list) the system reads the public homepage and records facts such as "no online booking", "no structured data (schema)", "running Google or Meta ads", "stale blog" and the website platform. Each prospect gets a fit score from 0 to 10 and a plain-English reason. Only signals you have <strong>confirmed</strong> under <em>Signals &amp; settings</em> are collected and used.</p>
+  <h3>Cohorts and campaigns</h3>
+  <p>The <strong>Cohort builder</strong> counts prospects live: choose what they must have, what disqualifies them, a minimum score and a city. Press <em>Create campaign</em> to turn the cohort into a campaign with a three-step email sequence (first email, follow-up, last note). The opening line of each email is written from the prospect's strongest signal. Emails stay short and follow the no-pitch-in-the-first-email rule.</p>
+  <h3>Approval desk</h3>
+  <p>Every drafted email waits on the <strong>Approval desk</strong>. One email fills the pane; use <kbd>A</kbd> to approve, <kbd>R</kbd> to reject and <kbd>J</kbd>/<kbd>K</kbd> to move. Approved emails are sent within your daily cap, never to someone who replied or unsubscribed, and always with an unsubscribe link and your company address.</p>
+  <h3>Replies and conversion</h3>
+  <p>When a prospect replies, open the prospect and use <em>Log reply</em>. The system classifies the reply (interested, not interested, unsubscribe, out of office, bounce), stops queued emails and updates the status. For an interested prospect press <strong>Convert to CRM lead</strong>; the prospect's signals and history move into the lead notes.</p>
+  {% if 'manager' in aud %}<h3>Team view</h3><p>Managers see every prospect and campaign; executives see their own.</p>{% endif %}
+</section>
+{% endif %}
+
+{% if 'delivery' in aud %}
+<section id="delivery" class="card">
+  <div class="card-head"><div><h2>Delivery &amp; work calendar</h2></div></div>
+  <p>When a lead is won, a delivery work item is created for the mapped service. The BD Manager accepts and routes it, the Project Manager creates assignments, and each team member accepts and updates their own work (In progress, Review, Completed). Every handover is recorded.</p>
+  <p>The <strong>Work calendar</strong> shows planned client deliverables by date. {% if 'crm' in aud %}Package templates are managed by the sales roles.{% endif %}</p>
+</section>
+{% endif %}
+
+{% if 'accounts' in aud %}
+<section id="accounts" class="card">
+  <div class="card-head"><div><h2>Accounts &amp; invoices</h2></div></div>
+  <p>Use <strong>Customers</strong> to keep billing details, <strong>Invoices</strong> to raise, send and record payments (with Excel export) and <strong>Expenses</strong> to log operating costs. The Accounts overview shows billing, collections and spend.</p>
+</section>
+{% endif %}
+
+{% if 'crm' in aud and 'bde_team' not in aud %}
+<section class="card" id="my-target">
+  <div class="card-head"><div><h2>My BDE target</h2></div></div>
+  <p>Open <strong>My BDE target</strong> under My work to see your monthly target, achievement slab (red, yellow, green) and history. Revenue counts leads you own that are marked <em>Won</em>, in the month they were won.</p>
+</section>
+{% endif %}
 
 <section id="faq" class="card">
-  <div class="card-head"><div><h2>13. FAQ & Troubleshooting</h2></div></div>
+  <div class="card-head"><div><h2>FAQ & Troubleshooting</h2></div></div>
   <dl>
     <dt>Camera/location permission denied?</dt>
     <dd>Browser settings → Site permissions → Allow camera & location for this origin. Refresh page.</dd>
@@ -367,14 +474,19 @@
 
 <style>
 .guide-layout{display:grid;grid-template-columns:260px 1fr;gap:32px;align-items:start}
-.guide-toc{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;position:sticky;top:100px;max-height:calc(100vh-120px);overflow:auto}
+.guide-toc{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;position:sticky;top:100px;max-height:calc(100vh - 120px);overflow:auto}
 .toc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .toc-header h3{margin:0;font-size:14px;color:#334155}
 .toc-close{display:none;background:none;border:none;font-size:18px;cursor:pointer;color:#64748b;padding:4px;line-height:1}
 .toc-list ol{margin:0;padding-left:20px}
 .toc-list a{color:#2563eb;text-decoration:none;font-size:13px;line-height:1.8;display:block}
 .toc-list a:hover{text-decoration:underline}
-.guide-content{min-width:0}
+.guide-content{min-width:0;counter-reset:gs}
+.guide-content>section>.card-head h2::before{counter-increment:gs;content:counter(gs) ". "}
+.guide-content section{counter-reset:gsub}
+.guide-content section h3::before{counter-increment:gsub;content:counter(gs) "." counter(gsub) " "}
+.guide-toc-ol{margin:0;padding-left:22px}
+.guide-access{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}.guide-access .pill{font-size:12px;padding:6px 10px}
 .card{margin-bottom:24px}
 .card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e2e8f0}
 .card-head h2{margin:0;font-size:18px;color:#0f172a}

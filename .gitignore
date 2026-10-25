@@ -5,3 +5,5 @@ __pycache__/
 *.bak*
 staticfiles/
 private_media/
+db.sqlite3
+media/

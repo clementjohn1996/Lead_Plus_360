@@ -1,4 +1,4 @@
-# LeadPlus-360 — Work Calendar Update
+# GrowthForge 360 — Work Calendar Update
 
 ## What was added
 
@@ -6,7 +6,7 @@ The Delivery module now includes a complete **Work Calendar & Delivery Planning*
 
 ### BDE workflow
 - A BDE changes a lead to **Won**.
-- LeadPlus-360 automatically opens the delivery-plan screen.
+- GrowthForge 360 automatically opens the delivery-plan screen.
 - The BDE selects a preset package or creates/uses a custom package.
 - Package templates automatically generate the required work items.
 - The BDE sets milestone dates, assigns owners, adds notes and submits the plan to the BDM.

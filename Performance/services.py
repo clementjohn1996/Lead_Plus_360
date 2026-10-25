@@ -173,9 +173,10 @@ AUTO_METRICS = {
 
 
 def applicable_kpis(employee):
+    # A KPI with no departments applies to everyone; otherwise to every department ticked on it.
     return KPI.objects.filter(is_active=True).filter(
-        Q(department__isnull=True) | Q(department_id=employee.department_id)
-    )
+        Q(departments__isnull=True) | Q(departments=employee.department_id)
+    ).distinct()
 
 
 def achievement(actual, target, higher_is_better=True):

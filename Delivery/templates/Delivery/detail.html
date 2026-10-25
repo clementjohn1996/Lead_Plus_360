@@ -1,5 +1,5 @@
 {% extends "leadplus_base.html" %}
-{% block title %}{{ work.title }} · LeadPlus-360{% endblock %}
+{% block title %}{{ work.title }} · GrowthForge 360{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">DELIVERY WORK #{{ work.pk }}</span><h1>{{ work.title }}</h1><p>{{ work.lead.company|default:work.lead.name }} · {{ work.service|default:"Service" }} · {{ work.department|default:"Unassigned department" }}</p></div><a class="secondary-btn" href="{% url 'delivery_dashboard' %}">← Workflow</a></div>
 <div class="kpi-grid">

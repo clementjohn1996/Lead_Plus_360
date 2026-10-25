@@ -95,13 +95,16 @@ def entries(request, pk):
 class KPIForm(forms.ModelForm):
     class Meta:
         model = KPI
-        fields = ["name", "description", "department", "auto_key", "unit", "weight", "higher_is_better",
+        fields = ["name", "description", "departments", "auto_key", "unit", "weight", "higher_is_better",
                   "default_target", "is_active"]
+
+        widgets = {"departments": forms.CheckboxSelectMultiple}
+        labels = {"departments": "Applies to departments"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            if not isinstance(field.widget, forms.CheckboxInput):
+            if not isinstance(field.widget, (forms.CheckboxInput, forms.CheckboxSelectMultiple)):
                 field.widget.attrs.setdefault("class", "form-control")
 
 
@@ -117,7 +120,7 @@ def kpis(request, pk=None):
     else:
         form = KPIForm(instance=instance)
     return render(request, "Performance/kpis.html", {
-        "form": form, "kpis": KPI.objects.select_related("department"), "editing": instance,
+        "form": form, "kpis": KPI.objects.prefetch_related("departments"), "editing": instance,
     })
 
 

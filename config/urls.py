@@ -3,8 +3,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-admin.site.site_header = "LeadPlus-360 Administration"
-admin.site.site_title = "LeadPlus-360"
+admin.site.site_header = "GrowthForge 360 Administration"
+admin.site.site_title = "GrowthForge 360"
 admin.site.index_title = "Company settings"
 
 urlpatterns = [
@@ -15,6 +15,7 @@ urlpatterns = [
     path("performance/", include("Performance.urls")),
     path("delivery/", include("Delivery.urls")),
     path("accounts/", include("Accounts.urls")),
+    path("outreach/", include("Outreach.urls")),
     path("tv/", include("Performance.tv_urls")),
     path("", include("Control.urls")),
 ]
