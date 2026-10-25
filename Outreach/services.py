@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.conf import settings as dj_settings
 from django.core.mail import EmailMessage
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -12,6 +12,43 @@ from Control.permissions import can_manage_team, is_admin, sees_all_leads
 
 from . import writer
 from .models import Campaign, OutboxMessage, OutreachSettings, Prospect, ProspectEvent
+
+
+class ProspectAllocator:
+    """Assign new prospects to the currently least-loaded active BDE."""
+
+    def __init__(self, fallback_user):
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        self.users = list(User.objects.filter(
+            is_active=True, profile__role__name="bd_executive", profile__role__is_active=True,
+        ).order_by("pk"))
+        self.fallback_user = fallback_user
+        counts = dict(Prospect.objects.values("owner_id").annotate(total=Count("id")).values_list("owner_id", "total"))
+        self.loads = {user.pk: counts.get(user.pk, 0) for user in self.users}
+
+    def next_owner(self):
+        if not self.users:
+            return self.fallback_user
+        user = min(self.users, key=lambda candidate: (self.loads[candidate.pk], candidate.pk))
+        self.loads[user.pk] += 1
+        return user
+
+
+def render_pitch(template, prospect, settings):
+    values = {
+        "first_name": prospect.first_name,
+        "contact_name": prospect.contact_name,
+        "company": prospect.company,
+        "industry": prospect.industry,
+        "sender_name": settings.sender_name or "The team",
+        "company_address": _address(settings),
+    }
+    pattern = re.compile(r"{{\s*([a-z_]+)\s*}}")
+    subject = pattern.sub(lambda match: values.get(match.group(1), match.group(0)), template.subject)
+    body = pattern.sub(lambda match: values.get(match.group(1), match.group(0)), template.body)
+    return subject[:200], body
 
 
 def scoped_prospects(user):
@@ -33,6 +70,8 @@ def cohort(user, filters):
         qs = qs.filter(score__gte=int(filters["min_score"]))
     if filters.get("city"):
         qs = qs.filter(city__icontains=filters["city"])
+    if filters.get("industries"):
+        qs = qs.filter(industry__in=filters["industries"])
     if filters.get("status"):
         qs = qs.filter(status=filters["status"])
     if filters.get("with_email"):
@@ -53,6 +92,7 @@ def parse_filters(data):
         "exclude": [k for k in getlist("exclude") if k],
         "min_score": min_score,
         "city": (get("city") or "").strip(),
+        "industries": [value.strip() for value in getlist("industry") if value.strip()],
         "status": (get("status") or "").strip(),
         "with_email": bool(get("with_email")),
     }
@@ -114,7 +154,7 @@ def is_due(message, now=None):
     return previous.sent_at + timedelta(days=days) <= now
 
 
-def send_due(limit=None):
+def send_due(limit=None, message_ids=None):
     """Send approved emails that are due, within the daily cap. Returns (sent, blocked_reason)."""
     cfg = OutreachSettings.get_solo()
     if cfg.sending_paused:
@@ -127,6 +167,8 @@ def send_due(limit=None):
     sent = 0
     queue = OutboxMessage.objects.filter(status="approved", campaign__status="active").select_related(
         "prospect", "campaign").order_by("approved_at")
+    if message_ids is not None:
+        queue = queue.filter(pk__in=message_ids)
     for message in queue:
         if sent >= remaining:
             break

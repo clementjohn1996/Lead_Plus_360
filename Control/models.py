@@ -36,6 +36,10 @@ class Role(models.Model):
         "Can use Outreach", default=False,
         help_text="Prospecting, website signals, campaigns and the email approval desk.",
     )
+    can_download_prospects = models.BooleanField(
+        "Can download prospects", default=False,
+        help_text="Can export prospect records to CSV.",
+    )
     is_privileged = models.BooleanField(
         "Privileged", default=False, help_text="Only a Super Admin may assign this role."
     )

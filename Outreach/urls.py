@@ -5,8 +5,11 @@ from . import views
 urlpatterns = [
     path("", views.dashboard, name="outreach_dashboard"),
     path("prospects/", views.prospect_list, name="outreach_prospects"),
+    path("prospects/contacted/", views.contacted_prospects, name="outreach_contacted"),
     path("prospects/new/", views.prospect_new, name="outreach_prospect_new"),
     path("prospects/export/", views.prospect_export, name="outreach_export"),
+    path("templates/", views.pitch_templates, name="outreach_templates"),
+    path("templates/<int:pk>/", views.pitch_templates, name="outreach_template_edit"),
     path("prospects/<int:pk>/", views.prospect_detail, name="outreach_prospect_detail"),
     path("import/", views.import_leads, name="outreach_import"),
     path("cohorts/", views.cohorts, name="outreach_cohorts"),

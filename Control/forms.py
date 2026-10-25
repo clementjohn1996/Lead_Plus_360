@@ -45,7 +45,8 @@ class RoleForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Role
         fields = ["label", "description", "level", "is_active", "can_use_crm", "sees_all_leads",
-                  "sees_team_leads", "can_manage_team", "can_manage_hr", "can_manage_accounts", "can_use_outreach", "is_privileged", "is_super_admin"]
+                  "sees_team_leads", "can_manage_team", "can_manage_hr", "can_manage_accounts", "can_use_outreach",
+                  "can_download_prospects", "is_privileged", "is_super_admin"]
         widgets = {"description": forms.Textarea(attrs={"rows": 2})}
 
     def __init__(self, *args, **kwargs):

@@ -57,6 +57,10 @@ def can_use_outreach(user):
     return has_flag(user, "can_use_outreach")
 
 
+def can_download_prospects(user):
+    return is_admin(user) or has_flag(user, "can_download_prospects")
+
+
 def has_employee(user):
     return bool(getattr(user, "is_authenticated", False) and getattr(user, "employee", None))
 

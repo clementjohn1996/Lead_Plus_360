@@ -2,7 +2,7 @@ from django import forms
 
 from LeadManager.models import Service
 
-from .models import Campaign, OutreachSettings, Prospect
+from .models import Campaign, OutreachSettings, PitchTemplate, Prospect
 from .profiler import domain_of, normalize_url
 
 
@@ -69,6 +69,17 @@ class CampaignForm(Styled, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["service"].queryset = Service.objects.all()
         self.fields["service"].required = False
+        self._style()
+
+
+class PitchTemplateForm(Styled, forms.ModelForm):
+    class Meta:
+        model = PitchTemplate
+        fields = ["name", "business_type", "subject", "body", "is_active"]
+        widgets = {"body": forms.Textarea(attrs={"rows": 9})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._style()
 
 

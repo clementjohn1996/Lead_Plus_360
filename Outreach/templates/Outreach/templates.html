@@ -1,0 +1,16 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Pitch templates · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>Client pitch templates</h1><p>Save reusable scripts and personalize each pitch automatically for the prospect.</p></div><a class="ghost-btn" href="{% url 'outreach_prospects' %}">Back to prospects</a></div>
+<section class="card"><div class="card-head"><div><h2>{% if current %}Edit template{% else %}Create a template{% endif %}</h2><p>Template fields support: {{ placeholders|join:", " }}.</p></div></div>
+<form method="post" class="lead-form">{% csrf_token %}
+<div class="form-grid">{% for field in form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}</div>{% endfor %}</div>
+<button class="primary-btn" name="action" value="save">Save template</button>
+{% if current %}<a class="ghost-btn" href="{% url 'outreach_templates' %}">Cancel</a>{% endif %}
+</form></section>
+<section class="card"><div class="card-head"><div><h2>Your templates</h2><p>Templates for a specific business type are only offered for matching prospects.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Business type</th><th>Subject</th><th>Status</th><th></th></tr></thead><tbody>
+{% for item in templates %}<tr><td>{{ item.name }}</td><td>{{ item.business_type|default:"Any" }}</td><td>{{ item.subject }}</td><td>{% if item.is_active %}Active{% else %}Inactive{% endif %}</td><td><a class="text-link" href="{% url 'outreach_template_edit' item.pk %}">Edit</a></td></tr>{% empty %}<tr><td colspan="5"><div class="empty">No templates yet. Save a script above to get started.</div></td></tr>{% endfor %}
+</tbody></table></div></section>
+{% if current %}<section class="card"><form method="post">{% csrf_token %}<button class="ghost-btn" name="action" value="delete" onclick="return confirm('Delete this pitch template?')">Delete this template</button></form></section>{% endif %}
+{% endblock %}

@@ -8,15 +8,18 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from Control.permissions import can_manage_team, can_use_outreach, is_admin, permission_required
+from Control.permissions import (
+    can_download_prospects, can_manage_team, can_use_outreach, is_admin, permission_required,
+)
 
 from . import importer, profiler, services
 from . import signals as sig
-from .forms import CampaignForm, ImportForm, ProspectForm, SettingsForm
-from .models import Campaign, OutboxMessage, OutreachSettings, Prospect, ProspectEvent
+from .forms import CampaignForm, ImportForm, PitchTemplateForm, ProspectForm, SettingsForm
+from .models import Campaign, OutboxMessage, OutreachSettings, PitchTemplate, Prospect, ProspectEvent
 
 outreach_required = permission_required(can_use_outreach)
 SCAN_BATCH = 15
+BULK_PITCH_LIMIT = 200
 
 
 def _prospect_or_404(user, pk):
@@ -65,14 +68,17 @@ def dashboard(request):
 
 # ---------------- prospects ----------------
 @outreach_required
-def prospect_list(request):
+def prospect_list(request, forced_status=""):
     qs = services.scoped_prospects(request.user)
     q = request.GET.get("q", "").strip()
-    status = request.GET.get("status", "")
+    status = forced_status or request.GET.get("status", "")
     if q:
         qs = qs.filter(Q(company__icontains=q) | Q(contact_name__icontains=q) | Q(email__icontains=q) | Q(city__icontains=q))
     if status:
         qs = qs.filter(status=status)
+    industry = request.GET.get("industry", "").strip()
+    if industry:
+        qs = qs.filter(industry__iexact=industry)
     if request.GET.get("min_score"):
         try:
             qs = qs.filter(score__gte=int(request.GET["min_score"]))
@@ -87,10 +93,90 @@ def prospect_list(request):
             done += 1
         messages.success(request, f"Scanned {done} prospect(s). (Up to {SCAN_BATCH} are scanned per click.)")
         return redirect(request.get_full_path())
-    page = Paginator(qs, 50).get_page(request.GET.get("page"))
+    elif request.method == "POST" and request.POST.get("action") == "pitch":
+        ids = list(dict.fromkeys(request.POST.getlist("ids")))[:BULK_PITCH_LIMIT]
+        template = get_object_or_404(_visible_pitch_templates(request.user), pk=request.POST.get("template"))
+        selected = list(services.scoped_prospects(request.user).filter(pk__in=ids).order_by("pk"))
+        if template.business_type:
+            selected = [p for p in selected if p.industry.casefold() == template.business_type.casefold()]
+        already_queued = set(OutboxMessage.objects.filter(
+            prospect_id__in=[p.pk for p in selected], status__in=["draft", "approved", "sent"],
+        ).values_list("prospect_id", flat=True))
+        eligible = [p for p in selected if p.can_email and p.email_status != "invalid" and not p.last_contacted
+                    and p.pk not in already_queued and p.status in ("new", "profiled", "qualified", "queued")]
+        if not eligible:
+            messages.warning(request, "No selected prospects are eligible. Check their email, business type, and contact status.")
+            return redirect("outreach_prospects")
+        cfg = OutreachSettings.get_solo()
+        campaign = Campaign.objects.create(
+            name=f"{template.name} · {timezone.localtime():%Y-%m-%d %H:%M}",
+            offer="Personalized client pitch", status="active", created_by=request.user,
+            filters={"industries": [template.business_type] if template.business_type else []},
+        )
+        pending_ids = []
+        for prospect in eligible:
+            subject, body = services.render_pitch(template, prospect, cfg)
+            message = OutboxMessage.objects.create(
+                prospect=prospect, campaign=campaign, step=1, subject=subject, body=body,
+                status="approved", approved_by=request.user, approved_at=timezone.now(),
+            )
+            pending_ids.append(message.pk)
+        sent, reason = services.send_due(limit=len(pending_ids), message_ids=pending_ids)
+        detail = f"Sent {sent} of {len(pending_ids)} selected pitch emails."
+        waiting = OutboxMessage.objects.filter(pk__in=pending_ids, status="approved").count()
+        failed = OutboxMessage.objects.filter(pk__in=pending_ids, status="failed").count()
+        if waiting:
+            detail += f" {waiting} remain approved for the next scheduled send (daily cap or sending pause)."
+        if failed:
+            detail += f" {failed} failed; review them in the approval desk."
+        if reason:
+            detail += f" {reason}"
+        messages.success(request, detail)
+        return redirect("outreach_outbox")
+    page = Paginator(qs, BULK_PITCH_LIMIT).get_page(request.GET.get("page"))
     return render(request, "Outreach/prospect_list.html", {
         "page": page, "q": q, "status": status, "statuses": Prospect.STATUSES, "batch": SCAN_BATCH,
-        "labels": sig.SIGNALS,
+        "labels": sig.SIGNALS, "industry": industry,
+        "industries": list(services.scoped_prospects(request.user).exclude(industry="").order_by("industry")
+                            .values_list("industry", flat=True).distinct()),
+        "templates": _visible_pitch_templates(request.user).filter(is_active=True),
+        "can_download": can_download_prospects(request.user), "bulk_limit": BULK_PITCH_LIMIT,
+        "contacted_only": forced_status == "contacted",
+    })
+
+
+def contacted_prospects(request):
+    return prospect_list(request, forced_status="contacted")
+
+
+def _visible_pitch_templates(user):
+    qs = PitchTemplate.objects.all()
+    if is_admin(user) or can_manage_team(user):
+        return qs
+    return qs.filter(created_by=user)
+
+
+@outreach_required
+def pitch_templates(request, pk=None):
+    current = get_object_or_404(_visible_pitch_templates(request.user), pk=pk) if pk else None
+    form = PitchTemplateForm(request.POST or None, instance=current)
+    if request.method == "POST":
+        action = request.POST.get("action", "save")
+        if action == "delete" and current:
+            current.delete()
+            messages.success(request, "Pitch template deleted.")
+            return redirect("outreach_templates")
+        if form.is_valid():
+            template = form.save(commit=False)
+            if not template.pk:
+                template.created_by = request.user
+            template.save()
+            messages.success(request, "Pitch template saved.")
+            return redirect("outreach_templates")
+    return render(request, "Outreach/templates.html", {
+        "form": form, "current": current, "templates": _visible_pitch_templates(request.user),
+        "placeholders": ["{{first_name}}", "{{contact_name}}", "{{company}}", "{{industry}}",
+                         "{{sender_name}}", "{{company_address}}"],
     })
 
 
@@ -99,7 +185,7 @@ def prospect_new(request):
     form = ProspectForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         prospect = form.save(commit=False)
-        prospect.owner = request.user
+        prospect.owner = services.ProspectAllocator(request.user).next_owner()
         prospect.source = "manual"
         prospect.save()
         messages.success(request, "Prospect added. Use Scan website to collect signals.")
@@ -168,7 +254,7 @@ def _prospect_action(request, prospect):
     return redirect("outreach_prospect_detail", pk=prospect.pk)
 
 
-@outreach_required
+@permission_required(can_download_prospects)
 def prospect_export(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="prospects.csv"'
@@ -208,6 +294,8 @@ def cohorts(request):
     return render(request, "Outreach/cohorts.html", {
         "filters": filters, "count": qs.count(), "rows": qs[:25],
         "signal_choices": [(k, v[0]) for k, v in sig.SIGNALS.items()], "statuses": Prospect.STATUSES,
+        "industries": list(services.scoped_prospects(request.user).exclude(industry="").order_by("industry")
+                            .values_list("industry", flat=True).distinct()),
         "query": request.GET.urlencode(),
     })
 

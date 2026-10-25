@@ -4,6 +4,7 @@
 <div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>New campaign</h1><p>The cohort below has <strong>{{ count }}</strong> prospect{{ count|pluralize }}{% if signal_labels %} with: {{ signal_labels|join:", " }}{% endif %}. <a class="text-link" href="{% url 'outreach_cohorts' %}">Change cohort</a></p></div></div>
 <section class="card"><form method="post" class="lead-form">{% csrf_token %}
 {% for k in filters.must %}<input type="hidden" name="must" value="{{ k }}">{% endfor %}{% for k in filters.exclude %}<input type="hidden" name="exclude" value="{{ k }}">{% endfor %}
+{% for industry in filters.industries %}<input type="hidden" name="industry" value="{{ industry }}">{% endfor %}
 <input type="hidden" name="min_score" value="{{ filters.min_score }}"><input type="hidden" name="city" value="{{ filters.city }}"><input type="hidden" name="status" value="{{ filters.status }}">{% if filters.with_email %}<input type="hidden" name="with_email" value="1">{% endif %}
 <div class="form-grid">{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}</div>
 <button class="primary-btn">Create campaign</button></form></section>

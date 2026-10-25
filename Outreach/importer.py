@@ -60,6 +60,7 @@ def import_prospects(rows, user, source="import"):
     from LeadManager.models import Lead
 
     from .models import Prospect, ProspectEvent
+    from .services import ProspectAllocator
 
     summary = {"created": 0, "duplicates": 0, "invalid": 0, "mapped": [], "unmapped": [], "errors": []}
     if not rows:
@@ -76,6 +77,7 @@ def import_prospects(rows, user, source="import"):
     seen_email |= set(Lead.objects.exclude(email="").values_list("email", flat=True))
     seen_email = {e.lower() for e in seen_email}
     seen_domain = set(Prospect.objects.exclude(domain="").values_list("domain", flat=True))
+    allocator = ProspectAllocator(user)
     for row in rows[1:MAX_ROWS + 1]:
         rec = {field: (row[i].strip() if i < len(row) else "") for i, field in mapping.items()}
         if not any(rec.values()):
@@ -98,7 +100,7 @@ def import_prospects(rows, user, source="import"):
             contact_title=rec.get("contact_title", "")[:120], email=email, phone=rec.get("phone", "")[:40],
             website=website[:300], domain=domain[:200], city=rec.get("city", "")[:100],
             country=rec.get("country", "")[:80], industry=rec.get("industry", "")[:100],
-            source=source, owner=user, email_status="unknown" if email else "unknown",
+            source=source, owner=allocator.next_owner(), email_status="unknown",
         )
         ProspectEvent.objects.create(prospect=prospect, kind="import", body="Imported from spreadsheet.", created_by=user)
         if email:

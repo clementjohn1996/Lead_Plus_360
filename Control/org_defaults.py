@@ -6,10 +6,11 @@ from .models import Role
 STANDARD_ROLES = (
     dict(name="super_admin", label="Super Admin", level=1, is_system=True, is_privileged=True,
          is_super_admin=True, can_use_crm=True, sees_all_leads=True, sees_team_leads=True,
-         can_manage_team=True, can_manage_hr=True, can_manage_accounts=True, can_use_outreach=True),
+         can_manage_team=True, can_manage_hr=True, can_manage_accounts=True, can_use_outreach=True,
+         can_download_prospects=True),
     dict(name="management", label="Management", level=2, is_system=True, can_use_crm=True,
          sees_all_leads=True, can_manage_team=True, can_manage_hr=True, can_manage_accounts=True,
-         can_use_outreach=True, is_privileged=True),
+         can_use_outreach=True, can_download_prospects=True, is_privileged=True),
     dict(name="hr", label="HR Manager", level=3, is_system=True, can_manage_team=True,
          can_manage_hr=True),
     dict(name="hr_recruiter", label="HR Recruiter", level=4, is_system=True, can_manage_hr=True,

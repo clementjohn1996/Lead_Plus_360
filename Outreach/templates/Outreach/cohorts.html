@@ -8,6 +8,7 @@
 <div class="field"><label>Leave out companies with</label><div class="check-grid"><div>{% for k, l in signal_choices %}<label><input type="checkbox" name="exclude" value="{{ k }}" {% if k in filters.exclude %}checked{% endif %}> {{ l }}</label>{% endfor %}</div></div></div>
 <div class="field"><label for="ms">Minimum fit score (0-10)</label><input id="ms" class="form-control" type="number" min="0" max="10" name="min_score" value="{{ filters.min_score }}"></div>
 <div class="field"><label for="ct">City contains</label><input id="ct" class="form-control" name="city" value="{{ filters.city }}"></div>
+<div class="field"><label for="industry">Business type</label><select id="industry" class="form-select" name="industry" multiple size="5">{% for value in industries %}<option value="{{ value }}" {% if value in filters.industries %}selected{% endif %}>{{ value }}</option>{% endfor %}</select><small class="muted">Use Ctrl or Command to select more than one.</small></div>
 <div class="field"><label for="st">Status</label><select id="st" class="form-select" name="status"><option value="">Any</option>{% for k, l in statuses %}<option value="{{ k }}" {% if k == filters.status %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
 <div class="field"><label><input type="checkbox" name="with_email" value="1" {% if filters.with_email %}checked{% endif %}> Only prospects with a usable email</label></div></div>
 <button class="primary-btn">Apply</button></form>

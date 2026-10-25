@@ -41,7 +41,9 @@ NAV = [
     ("Growth engine", [
         ("Growth overview", "◎", "outreach_dashboard", ["outreach_dashboard"], can_use_outreach),
         ("Prospects", "⌕", "outreach_prospects",
-         ["outreach_prospects", "outreach_prospect_detail", "outreach_prospect_new"], can_use_outreach),
+         ["outreach_prospects", "outreach_contacted", "outreach_prospect_detail", "outreach_prospect_new"], can_use_outreach),
+        ("Pitch templates", "✉", "outreach_templates",
+         ["outreach_templates", "outreach_template_edit"], can_use_outreach),
         ("Import leads (Excel/CSV)", "⇪", "outreach_import", ["outreach_import"], can_use_outreach),
         ("Cohort builder", "◧", "outreach_cohorts", ["outreach_cohorts"], can_use_outreach),
         ("Campaigns", "✉", "outreach_campaigns",
