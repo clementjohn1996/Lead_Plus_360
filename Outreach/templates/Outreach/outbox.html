@@ -1,0 +1,29 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Approval desk · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>Approval desk</h1><p>{{ drafts|length }} email{{ drafts|length|pluralize }} waiting · {{ approved }} approved · {{ sent_today }}/{{ cap }} sent today. Shortcuts: <kbd>A</kbd> approve · <kbd>R</kbd> reject · <kbd>J</kbd>/<kbd>K</kbd> next/previous.</p></div>
+<form method="post" class="head-actions">{% csrf_token %}<button class="ghost-btn" name="action" value="send_now">Send approved now</button></form></div>
+<div class="grid-2-1">
+<section class="card">{% if m %}
+<div class="card-head"><div><h2>To: {{ m.prospect.company }}</h2><p>{{ m.prospect.contact_name }} &lt;{{ m.prospect.email }}&gt; · campaign {{ m.campaign.name }} · step {{ m.step }}</p></div><a class="ghost-btn" href="{% url 'outreach_prospect_detail' m.prospect.pk %}">Prospect</a></div>
+{% if issues %}<div class="form-errors">Avoid these phrases: {{ issues|join:", " }}</div>{% endif %}
+<p class="muted">{{ word_count }} words (aim for {{ word_limit }} or fewer).{% if m.prospect.score is not None %} Fit score {{ m.prospect.score }}/10.{% endif %}</p>
+<form method="post" class="lead-form" id="decide">{% csrf_token %}<input type="hidden" name="id" value="{{ m.pk }}">
+<div class="field"><label for="subj">Subject</label><input id="subj" class="form-control" name="subject" value="{{ m.subject }}"></div>
+<div class="field"><label for="bod">Email (edit freely)</label><textarea id="bod" class="form-control" name="body" rows="12">{{ m.body }}</textarea></div>
+<div class="row-gap"><button class="primary-btn" name="action" value="approve" id="btn-approve">Approve (A)</button><button class="ghost-btn" name="action" value="reject" id="btn-reject">Reject (R)</button></div>
+<p class="muted">An unsubscribe link and your company address are added automatically when the email is sent.</p></form>
+{% else %}<div class="empty big">Nothing waiting. Generate drafts from a campaign.</div>{% endif %}</section>
+<section class="card"><div class="card-head"><div><h2>Queue</h2></div></div>
+{% for d in drafts|slice:":30" %}<div class="check-item {% if m and d.pk == m.pk %}done{% endif %}"><div class="body"><a class="text-link" href="?m={{ d.pk }}" {% if m and d.pk == m.pk %}data-current{% endif %}>{{ d.prospect.company }}</a><br><small>Step {{ d.step }} · {{ d.campaign.name }}</small></div></div>{% empty %}<div class="empty">Queue is empty.</div>{% endfor %}
+{% if recent %}<h3>Recently sent</h3>{% for r in recent %}<div class="check-item"><div class="body"><b>{{ r.prospect.company }}</b><br><small>Step {{ r.step }} · {{ r.get_status_display }}{% if r.error %} · {{ r.error }}{% endif %}</small></div></div>{% endfor %}{% endif %}</section>
+</div>
+{% endblock %}
+{% block scripts %}<script>
+(function(){var links=[].slice.call(document.querySelectorAll('.check-item a[href^="?m="]'));var cur=links.findIndex(function(a){return a.hasAttribute('data-current')});
+document.addEventListener('keydown',function(e){var t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||e.ctrlKey||e.metaKey||e.altKey)return;var k=e.key.toLowerCase();
+if(k==='a'){var b=document.getElementById('btn-approve');if(b){e.preventDefault();b.click()}}
+else if(k==='r'){var r=document.getElementById('btn-reject');if(r){e.preventDefault();r.click()}}
+else if(k==='j'&&links[cur+1]){location.href=links[cur+1].getAttribute('href')}
+else if(k==='k'&&links[cur-1]){location.href=links[cur-1].getAttribute('href')}});})();
+</script>{% endblock %}

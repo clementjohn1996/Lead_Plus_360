@@ -1,0 +1,8 @@
+{% extends "leadplus_base.html" %}
+{% block title %}{{ c.name }} · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">CAMPAIGN</span><h1>{{ c.name }}</h1><p><span class="pill">{{ c.get_status_display }}</span> · {{ cohort_size }} prospect{{ cohort_size|pluralize }} in cohort{% if labels %} · must have: {{ labels|join:", " }}{% endif %}{% if excluded %} · excluding: {{ excluded|join:", " }}{% endif %}</p></div>
+<form method="post" class="head-actions">{% csrf_token %}<button class="ghost-btn" name="action" value="draft">Generate drafts</button>{% if c.status == 'active' %}<button class="ghost-btn" name="action" value="pause">Pause</button>{% else %}<button class="primary-btn" name="action" value="activate">Activate</button>{% endif %}</form></div>
+<div class="metric-grid">{% for key, label in statuses %}<div class="metric"><span>{{ label }}</span><strong>{% for k, n in counts.items %}{% if k == key %}{{ n }}{% endif %}{% endfor %}</strong></div>{% endfor %}</div>
+<section class="card"><div class="card-head"><div><h2>How it works</h2></div></div><ol><li><strong>Generate drafts</strong> writes a three-email sequence for each prospect from their strongest signal.</li><li>Review each on the <a class="text-link" href="{% url 'outreach_outbox' %}">Approval desk</a>.</li><li><strong>Activate</strong> the campaign. Approved emails go out within your daily cap; follow-ups wait {{ c.followup_days_2 }} and {{ c.followup_days_3 }} days and stop as soon as someone replies.</li></ol><p class="muted">Offer: {{ c.offer }}</p></section>
+{% endblock %}

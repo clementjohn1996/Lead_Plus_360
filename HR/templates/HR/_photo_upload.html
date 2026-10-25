@@ -1,0 +1,2 @@
+<form method="post" action="{% url 'hr_employee_photo' e.pk %}" enctype="multipart/form-data" class="photo-upload">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+<label class="ghost-btn small-btn" title="Choose an image, it uploads automatically">{% if e.photo_url %}Change photo{% else %}Add photo{% endif %}<input type="file" name="photo" accept="image/*" hidden onchange="this.form.submit()"></label></form>

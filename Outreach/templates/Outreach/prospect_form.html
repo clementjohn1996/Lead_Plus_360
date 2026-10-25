@@ -1,0 +1,8 @@
+{% extends "leadplus_base.html" %}
+{% block title %}{{ title }} · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>{{ title }}</h1></div><a class="ghost-btn" href="{% url 'outreach_prospects' %}">Back</a></div>
+<section class="card"><form method="post" class="lead-form">{% csrf_token %}<div class="form-grid">
+{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% for e in f.errors %}<small class="error">{{ e }}</small>{% endfor %}</div>{% endfor %}</div>
+<button class="primary-btn">Save prospect</button></form></section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load static %}
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{{ product_name|default:"GrowthForge 360" }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'leadplus/app.css' %}">
+<link rel="stylesheet" href="{% static 'leadplus/modules.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'leadplus/accounts.css' %}">
+</head><body>
+{% with url=request.resolver_match.url_name %}
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="{% url 'home' %}">{% if organization.logo %}<img class="brand-logo" src="{{ organization.logo.url }}" alt="{{ organization.name }}">{% else %}<span class="brand-mark">{{ organization.name|first|upper }}</span>{% endif %}<span>{{ organization.name }}</span></a>
+  <div class="workspace"><small>WORKSPACE</small><strong>{{ product_name }}</strong></div>
+<nav class="side-nav" aria-label="Main navigation">
+{% for group in nav_groups %}{% if group.title %}<div class="nav-label">{{ group.title }}</div>{% endif %}{% for item in group.items %}<a class="{% if item.active %}active{% endif %}" href="{% url item.url_name %}"><i>{{ item.icon }}</i> {{ item.label }}</a>
+{% endfor %}{% endfor %}
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="user-mini" href="{% url 'profile' %}">{% if request.user.profile.profile_picture %}<span class="avatar photo"><img src="{{ request.user.profile.profile_picture.url }}" alt=""></span>{% else %}<span class="avatar">{{ request.user.username|first|upper }}</span>{% endif %}<div><b>{{ request.user.get_full_name|default:request.user.username }}</b><small>{{ nav.role_label|default:"Team member" }}</small></div></a>
+    <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button type="submit" class="logout">↪ Sign out</button></form>
+  </div>
+</aside>
+<div class="sidebar-scrim" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
+<main class="main">
+<header class="topbar"><button class="mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+ {% if nav.crm %}<div class="top-search">🔍 <input id="globalSearch" placeholder="Search leads, companies, email..." autocomplete="off"></div>{% else %}<div class="top-search"></div>{% endif %}
+ <div class="top-actions">{% block topbar_actions %}{% endblock %}<form action="{% url 'logout' %}" method="post" class="top-logout-form">{% csrf_token %}<button type="submit" class="top-logout">↪ Logout</button></form></div>
+</header>
+<div class="content">
+{% if messages %}<div class="toast-stack">{% for message in messages %}<div class="toast {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+</div>
+</main></div>
+{% endwith %}
+<script>
+const s=document.getElementById('globalSearch'); if(s){s.addEventListener('keydown',e=>{if(e.key==='Enter'&&s.value.trim()) location.href='{% if nav.crm %}{% url "leads" %}{% endif %}?q='+encodeURIComponent(s.value.trim())})}
+setTimeout(()=>document.querySelectorAll('.toast').forEach(x=>x.remove()),4500);
+</script>
+{% block scripts %}{% endblock %}
+</body></html>

@@ -1,0 +1,21 @@
+{% extends "leadplus_base.html" %}{% block title %}{{ emp.full_name }} · Performance{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PERFORMANCE</span><h1>{{ emp.full_name }}</h1><p>{{ emp.designation|default:"Team member" }}{% if emp.department %} · {{ emp.department.name }}{% endif %} · {{ month|date:"F Y" }}</p></div>
+<div class="row-gap">
+ <a class="ghost-btn" href="?month={{ nav.prev }}">← Previous</a>
+ {% if nav.next %}<a class="ghost-btn" href="?month={{ nav.next }}">Next →</a>{% endif %}
+ {% if can_edit %}<a class="primary-btn" href="{% url 'performance_entries' emp.pk %}?month={{ month|date:'Y-m' }}">Enter KPIs</a>{% endif %}
+</div></div>
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>Overall score</h2><p>Weighted average of KPI achievement</p></div></div>
+<div class="row-gap">{% if result.score is not None %}<div class="score-ring {{ result.css }}" style="--s:{{ result.score }}"><span>{{ result.score }}</span></div>{% else %}<div class="score-ring"><span>—</span></div>{% endif %}
+<div><span class="pill {{ result.css }}">{{ result.label }}</span></div></div></section>
+<section class="card"><div class="card-head"><div><h2>Last 6 months</h2></div></div>
+<div class="spark">{% for h in history %}<div><i style="height:{{ h.score|default:0 }}%"></i><small>{{ h.score|default:"–" }}</small><small>{{ h.month|date:"M" }}</small></div>{% endfor %}</div></section>
+</div>
+<section class="card"><div class="card-head"><div><h2>KPI breakdown</h2></div></div>
+{% for k in result.kpis %}<div class="kpi-row"><div><b>{{ k.kpi.name }}</b><br><small class="muted">{% if k.kpi.is_auto %}Automatic{% else %}Manual{% endif %} · weight {{ k.kpi.weight }}</small></div>
+<div>{% if k.percent is not None %}<div class="progress {% if k.percent >= 100 %}green{% endif %}"><i style="width:{% if k.percent > 100 %}100{% else %}{{ k.percent }}{% endif %}%"></i></div>{% else %}<span class="muted">No data</span>{% endif %}</div>
+<div class="right">{% if k.actual is not None %}<b>{{ k.actual|floatformat:"-1" }}{{ k.kpi.unit }}</b> <small class="muted">/ {{ k.target|floatformat:"-1" }}{{ k.kpi.unit }}</small>{% endif %}</div></div>
+{% empty %}<div class="empty">No KPIs configured yet.</div>{% endfor %}</section>
+{% endblock %}

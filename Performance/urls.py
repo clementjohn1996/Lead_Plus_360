@@ -1,0 +1,35 @@
+from django.urls import path
+
+from . import bde_views, views
+
+urlpatterns = [
+    path("", views.leaderboard, name="performance"),
+    path("me/", views.employee_performance, name="performance_me"),
+    path("employee/<int:pk>/", views.employee_performance, name="performance_employee"),
+    path("employee/<int:pk>/entries/", views.entries, name="performance_entries"),
+    path("kpis/", views.kpis, name="performance_kpis"),
+    path("kpis/<int:pk>/", views.kpis, name="performance_kpi_edit"),
+    path("pip/", views.pip_list, name="pip_list"),
+    path("pip/new/", views.pip_create, name="pip_create"),
+    path("pip/<int:pk>/", views.pip_detail, name="pip_detail"),
+    path("pip/<int:pk>/update/", views.pip_update, name="pip_update"),
+    path("pip/<int:pk>/close/", views.pip_close, name="pip_close"),
+    path("pip/<int:pk>/delete/", views.pip_delete, name="pip_delete"),
+    path("bde/", bde_views.dashboard, name="bde_dashboard"),
+    path("bde/me/", bde_views.profile, name="bde_me"),
+    path("bde/employee/<int:pk>/", bde_views.profile, name="bde_profile"),
+    path("bde/calendar/", bde_views.calendar_view, name="bde_calendar"),
+    path("bde/record/<int:pk>/", bde_views.record_update, name="bde_record_update"),
+    path("bde/config/", bde_views.config, name="bde_config"),
+    path("bde/config/target/<int:pk>/", bde_views.target_update, name="bde_target_update"),
+    path("bde/recalculate/", bde_views.recalculate, name="bde_recalculate"),
+    path("bde/audit/", bde_views.audit_log, name="bde_audit"),
+    path("bde/alerts/clear/", bde_views.alerts_clear, name="bde_alerts_clear"),
+    path("bde/export.csv", bde_views.export_csv, name="bde_export"),
+    path("appraisals/", bde_views.appraisal_list, name="bde_appraisals"),
+    path("appraisals/<int:pk>/", bde_views.appraisal_detail, name="bde_appraisal"),
+    path("tv/", views.tv_manage, name="performance_tv_manage"),
+    path("tv/<int:pk>/", views.tv_action, name="performance_tv_action"),
+    path("tv/poster/add/", views.tv_poster_create, name="performance_tv_poster_create"),
+    path("tv/poster/<int:pk>/", views.tv_poster_action, name="performance_tv_poster_action"),
+]

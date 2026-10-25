@@ -1,0 +1,28 @@
+{% extends "leadplus_base.html" %}{% load humanize %}{% block title %}{{ emp.full_name }} · BDE performance{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">BDE PERFORMANCE</span><h1>{{ emp.full_name }}</h1><p>{{ emp.designation|default:"Business Development Executive" }}{% if emp.manager %} · reports to {{ emp.manager.full_name }}{% endif %}</p></div>
+<div class="row-gap"><a class="ghost-btn" href="{% url 'performance_employee' emp.pk %}">KPI scorecard</a>{% if can_review %}<a class="ghost-btn" href="{% url 'bde_dashboard' %}">All BDEs</a>{% endif %}</div></div>
+{% if not is_bde %}<div class="status-box">This employee does not hold the Business Development Executive role, so no BDE target applies.</div>{% endif %}
+{% if s.record %}
+<section class="card"><div class="card-head"><div><h2>This month ({{ s.record.month|date:"F Y" }})</h2><p>Target ₹{{ s.record.target|floatformat:0|intcomma }} · achieved ₹{{ s.record.revenue|floatformat:0|intcomma }}</p></div>
+<div><span class="pill {{ s.status }}" title="{{ s.reason }}">{{ s.status_label }}</span> {% if s.open_pip %}<a class="pill pip" href="{% url 'pip_detail' s.open_pip.pk %}">PIP {{ s.open_pip.get_status_display }}</a>{% endif %}</div></div>
+{% include "Performance/_segments.html" with segs=s.segments big=True %}
+<p style="margin-top:10px"><b>{{ s.record.achievement_pct }}%</b>{% if s.record.achievement_pct > 100 %} <span class="exceeded">- Target Exceeded</span>{% endif %} · Slab {{ s.record.slab }}/{{ cfg.slabs }} · <span class="pill c-{{ s.record.effective_colour }}">{{ s.record.effective_colour|title }} - {{ s.record.category }}</span></p>
+<small class="muted">Status basis: {{ s.reason }}.</small></section><br>
+{% elif is_bde %}<div class="status-box">No performance record for this month yet.</div>{% endif %}
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>Last {{ cfg.window_months }} completed months</h2></div></div>
+<div class="row-gap">{% for r in window %}<div style="text-align:center"><div class="cal-cell {{ r.effective_colour }}">{{ r.effective_colour|title }}</div><small>{{ r.month|date:"M Y" }}</small></div>{% empty %}<span class="muted">No completed months yet.</span>{% endfor %}</div></section>
+<section class="card"><div class="card-head"><div><h2>Trend</h2><p>Achievement % per month</p></div></div>
+<div class="trend">{% for t in trend %}<div><span>{{ t.rec.achievement_pct|floatformat:0 }}%</span><i class="{{ t.rec.effective_colour }}" style="height:{{ t.height }}%"></i><small>{{ t.rec.month|date:"M" }}</small></div>{% empty %}<span class="muted">No data.</span>{% endfor %}</div></section>
+</div><br>
+<section class="card"><div class="card-head"><div><h2>Monthly history</h2></div></div><div class="table-wrap"><table><thead><tr><th>Month</th><th>Target</th><th>Revenue</th><th>%</th><th>Slab</th><th>Colour</th><th>Status</th><th>Manager review</th></tr></thead><tbody>
+{% for r in history %}<tr><td>{{ r.month|date:"M Y" }}{% if not r.is_closed %} <small class="muted">(in progress)</small>{% endif %}</td><td>₹{{ r.target|floatformat:0|intcomma }}</td><td>₹{{ r.revenue|floatformat:0|intcomma }}</td><td>{{ r.achievement_pct }}%</td><td>{{ r.slab }}/{{ cfg.slabs }}</td><td><span class="pill c-{{ r.effective_colour }}">{{ r.effective_colour|title }}</span>{% if r.colour_override %} <small class="muted">(adjusted)</small>{% endif %}</td><td><span class="pill {{ r.status }}">{{ r.get_status_display }}</span></td>
+<td>{% if can_review %}<form method="post" action="{% url 'bde_record_update' r.pk %}" class="stack" style="gap:6px">{% csrf_token %}<textarea name="manager_remarks" rows="2" class="form-control" placeholder="Remarks">{{ r.manager_remarks }}</textarea><div class="row-gap"><input type="date" name="review_date" class="form-control" style="width:auto" value="{{ r.review_date|date:'Y-m-d' }}">{% if is_hr %}<select name="colour_override" class="form-control" style="width:auto"><option value="">Colour: automatic</option><option value="red" {% if r.colour_override == 'red' %}selected{% endif %}>Force Red</option><option value="yellow" {% if r.colour_override == 'yellow' %}selected{% endif %}>Force Yellow</option><option value="green" {% if r.colour_override == 'green' %}selected{% endif %}>Force Green</option></select>{% endif %}<button class="ghost-btn">Save</button></div></form>
+{% else %}{{ r.manager_remarks|default:"-" }}{% if r.review_date %}<br><small class="muted">Reviewed {{ r.review_date|date:"d M Y" }}</small>{% endif %}{% endif %}</td></tr>
+{% empty %}<tr><td colspan="8"><div class="empty">No history yet.</div></td></tr>{% endfor %}</tbody></table></div></section><br>
+<div class="two-col">
+<section class="card"><div class="card-head"><div><h2>PIP history</h2></div></div>{% for p in plans %}<div class="alert-row"><span><a href="{% url 'pip_detail' p.pk %}">{{ p.start_date|date:"d M Y" }}</a> · {{ p.trigger_reason|default:"Manual plan" }}</span><span class="pill {{ p.status }}">{{ p.get_status_display }}</span></div>{% empty %}<p class="muted">No plans.</p>{% endfor %}</section>
+<section class="card"><div class="card-head"><div><h2>Appraisal history</h2></div></div>{% for a in appraisals %}<div class="alert-row"><span><a href="{% url 'bde_appraisal' a.pk %}">{{ a.period_start|date:"M Y" }} - {{ a.period_end|date:"M Y" }}</a></span><span class="pill">{{ a.get_decision_display }}</span></div>{% empty %}<p class="muted">No appraisals.</p>{% endfor %}</section>
+</div>
+{% endblock %}

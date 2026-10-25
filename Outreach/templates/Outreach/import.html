@@ -1,0 +1,12 @@
+{% extends "leadplus_base.html" %}
+{% block title %}Import leads · {{ product_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">GROWTH ENGINE</span><h1>Import leads from Excel or CSV</h1><p>Drop in any sheet of companies. Column names are recognised automatically and duplicates are skipped.</p></div><a class="ghost-btn" href="{% url 'outreach_prospects' %}">View prospects</a></div>
+<div class="grid-2-1">
+<section class="card"><form method="post" enctype="multipart/form-data" class="lead-form">{% csrf_token %}{{ form.file.label_tag }}{{ form.file }}{% for e in form.file.errors %}<small class="error">{{ e }}</small>{% endfor %}<button class="primary-btn">Import</button></form>
+{% if summary %}<hr><h3>Result</h3>{% for e in summary.errors %}<div class="form-errors">{{ e }}</div>{% endfor %}
+<div class="metric-grid"><div class="metric"><span>Added</span><strong>{{ summary.created }}</strong></div><div class="metric"><span>Duplicates skipped</span><strong>{{ summary.duplicates }}</strong></div><div class="metric"><span>Rows skipped</span><strong>{{ summary.invalid }}</strong></div></div>
+{% if summary.mapped %}<p><strong>Columns understood:</strong> {{ summary.mapped|join:", " }}</p>{% endif %}{% if summary.unmapped %}<p class="muted">Ignored columns: {{ summary.unmapped|join:", " }}</p>{% endif %}{% endif %}</section>
+<section class="card"><div class="card-head"><div><h2>Tips</h2></div></div><ul><li>First row must be the column headings.</li><li>Recognised headings: Company, Contact, Title, Email, Phone, Website, City, Country, Industry.</li><li>Each row needs a company plus an email, website or phone.</li><li>Rows whose email already exists as a prospect or CRM lead are skipped.</li><li>Maximum 5,000 rows and 5 MB per file.</li></ul></section>
+</div>
+{% endblock %}

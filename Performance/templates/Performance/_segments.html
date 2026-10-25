@@ -1,0 +1,1 @@
+<div class="segs" role="img" aria-label="{{ label|default:'Achievement slabs' }}">{% for g in segs %}<div class="seg {{ g.colour }}{% if g.filled %} filled{% endif %}{% if big %} big{% endif %}" title="Slab {{ g.n }}: {{ g.colour|title }}{% if g.filled %} (reached){% endif %}">{{ g.n }}</div>{% endfor %}</div>
